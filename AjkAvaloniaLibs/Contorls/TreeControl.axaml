@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:ctrl="clr-namespace:AjkAvaloniaLibs.Contorls;assembly=AjkAvaloniaLibs"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             x:Class="AjkAvaloniaLibs.Contorls.TreeControl">
+	<TreeView
+        Name="TreeView"
+        x:DataType="ctrl:TreeControlViewModel"
+        ItemsSource="{Binding _nodes}"
+        >
+		
+		<TreeView.ItemTemplate>
+			<TreeDataTemplate
+                x:DataType="ctrl:TreeNode"
+                ItemsSource="{Binding _nodes}"
+            >
+				<!-- ItemはImageとTextBlockを横に並べた構造にする -->
+				<StackPanel Orientation="Horizontal">
+					<Image Source="{Binding Image}" Width="16" Height="16"/>
+					<TextBlock Text="{Binding Text}" Margin="8 0 0 0" />
+				</StackPanel>
+			</TreeDataTemplate>
+		</TreeView.ItemTemplate>
+
+	</TreeView>
+</UserControl>

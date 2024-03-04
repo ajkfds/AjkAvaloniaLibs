@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34316.72
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AjkAvaloniaLibs", "AjkAvaloniaLibs\AjkAvaloniaLibs.csproj", "{25552689-DB72-4761-A24C-BD3AEDC69968}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AjkAvaloniaLibs.Desktop", "AjkAvaloniaLibs.Desktop\AjkAvaloniaLibs.Desktop.csproj", "{017154C3-D588-4404-96D8-F7A7C3A495CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25552689-DB72-4761-A24C-BD3AEDC69968}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25552689-DB72-4761-A24C-BD3AEDC69968}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25552689-DB72-4761-A24C-BD3AEDC69968}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25552689-DB72-4761-A24C-BD3AEDC69968}.Release|Any CPU.Build.0 = Release|Any CPU
+		{017154C3-D588-4404-96D8-F7A7C3A495CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{017154C3-D588-4404-96D8-F7A7C3A495CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{017154C3-D588-4404-96D8-F7A7C3A495CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{017154C3-D588-4404-96D8-F7A7C3A495CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F4A0A1F8-D0F9-43DF-A219-05834655A4DB}
+	EndGlobalSection
+EndGlobal
