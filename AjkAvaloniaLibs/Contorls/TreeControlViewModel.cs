@@ -25,15 +25,15 @@ namespace AjkAvaloniaLibs.Contorls
             get { return Nodes.ReadOnlyNodes; }
         }
 
-        // 双方向BIndingのためのViewModelへのProperty変更通知
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
+        //// 双方向BIndingのためのViewModelへのProperty変更通知
+        //public event PropertyChangedEventHandler? PropertyChanged;
+        //private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        //{
+        //    if (PropertyChanged != null)
+        //    {
+        //        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        //    }
+        //}
 
     }
 }

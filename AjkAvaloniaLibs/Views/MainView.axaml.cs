@@ -1,5 +1,6 @@
 ﻿using AjkAvaloniaLibs.Contorls;
 using Avalonia.Controls;
+using ExCSS;
 
 namespace AjkAvaloniaLibs.Views;
 
@@ -9,6 +10,18 @@ public partial class MainView : UserControl
     {
         InitializeComponent();
 
+        // ListView initialize
+        ListViewItem listItem1 = new ListViewItem("item1");
+        ListViewItem listItem2 = new ListViewItem("item2", Avalonia.Media.Colors.Red);
+        ListViewItem listItem3 = new ListViewItem("item3", Avalonia.Media.Colors.Blue);
+
+        ListView1.Items.Add(listItem1);
+        ListView1.Items.Add(listItem2);
+        ListView1.Items.Add(listItem3);
+
+
+
+        // Tree1 initialize
         TreeNode node1 = new TreeNode("node1");
         TreeNode node2 = new TreeNode("node2");
         TreeNode node3 = new TreeNode("node3");

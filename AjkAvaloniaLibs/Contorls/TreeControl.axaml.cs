@@ -11,6 +11,25 @@ namespace AjkAvaloniaLibs.Contorls
             InitializeComponent();
             // DataContextのViewModelの設定
             TreeView.DataContext = new TreeControlViewModel();
+
+            if (Design.IsDesignMode)
+            {
+                TreeNode node1 = new TreeNode("TestNode1");
+                TreeNode node2 = new TreeNode("TestNode2");
+                TreeNode node3 = new TreeNode("TestNode3");
+                TreeNode node4 = new TreeNode("TestNode4");
+                TreeNode node5 = new TreeNode("TestNode5");
+                TreeNode node6 = new TreeNode("TestNode5");
+
+                Nodes.Add(node1);
+                Nodes.Add(node2);
+                Nodes.Add(node3);
+
+                node1.Nodes.Add(node4);
+                node1.Nodes.Add(node5);
+
+                node2.Nodes.Add(node6);
+            }
         }
 
         public TreeNode.TreeNodes Nodes
@@ -35,9 +54,6 @@ namespace AjkAvaloniaLibs.Contorls
             node.OnClicked();
         }
 
-        private void TreeView_Tapped_1(object? sender, Avalonia.Input.TappedEventArgs e)
-        {
-        }
 
         // 選択アイテム変更ハンドラ
         private void TreeView_SelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)

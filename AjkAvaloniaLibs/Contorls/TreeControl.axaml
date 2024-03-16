@@ -3,26 +3,55 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:ctrl="clr-namespace:AjkAvaloniaLibs.Contorls;assembly=AjkAvaloniaLibs"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
              x:Class="AjkAvaloniaLibs.Contorls.TreeControl">
 	<TreeView
         Name="TreeView"
         x:DataType="ctrl:TreeControlViewModel"
         ItemsSource="{Binding _nodes}"
+		Tapped="TreeView_Tapped"
+		DoubleTapped="TreeView_DoubleTapped"
+		SelectionChanged="TreeView_SelectionChanged"
         >
-		
+
 		<TreeView.ItemTemplate>
 			<TreeDataTemplate
                 x:DataType="ctrl:TreeNode"
                 ItemsSource="{Binding _nodes}"
             >
 				<!-- ItemはImageとTextBlockを横に並べた構造にする -->
-				<StackPanel Orientation="Horizontal">
-					<Image Source="{Binding Image}" Width="16" Height="16"/>
-					<TextBlock Text="{Binding Text}" Margin="8 0 0 0" />
+				<StackPanel Orientation="Horizontal" Height ="14">
+					<Image Source="{Binding Image}" Width="12" Height="12"/>
+					<TextBlock Text="{Binding Text}" Margin="4 0 0 0" FontSize="10" />
 				</StackPanel>
 			</TreeDataTemplate>
 		</TreeView.ItemTemplate>
 
+		<TreeView.Resources> 
+			<!-- expand/collapse 変更用 icon定義 -->
+			<StreamGeometry x:Key="TreeViewItemCollapsedChevronPathData">M 0,4 4,4 4,0 6,0 6,4 10,4 10,6 6,6 6,10 4,10 4,6 0,6 0,4 Z</StreamGeometry>
+			<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M 0,4 10,4 10,6 0,6 Z</StreamGeometry>
+		</TreeView.Resources> 
+		<TreeView.Styles>
+			<Style Selector="TreeViewItem">
+				<!-- IsExpanded Propertyを更新する -->
+				<Setter Property="IsExpanded" Value="{Binding Path=IsExpanded,Mode=TwoWay}"/>
+				<!-- 行間隔を変更するために必要 -->
+				<Setter Property="MinHeight" Value="12"/>
+			</Style>
+			
+			<!-- expand/collapse 変更用 icon変更 -->
+			<Style Selector="ToggleButton:checked /template/ Path#ChevronPath">
+				<Setter Property="Data" Value="{StaticResource TreeViewItemExpandedChevronPathData}" />
+			</Style>
+			<Style Selector="ToggleButton:unchecked /template/ Path#ChevronPath">
+				<Setter Property="Data" Value="{StaticResource TreeViewItemCollapsedChevronPathData}" />
+			</Style>
+			<Style Selector="TreeViewItem /template/ ToggleButton#PART_ExpandCollapseChevron">
+				<Setter Property="Width" Value="10"></Setter>
+				<Setter Property="Height" Value="10"></Setter>
+			</Style>
+			
+		</TreeView.Styles>
 	</TreeView>
 </UserControl>
