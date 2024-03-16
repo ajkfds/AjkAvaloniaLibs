@@ -23,6 +23,10 @@ namespace AjkAvaloniaLibs.Contorls
             }
         }
 
+        public void Scroll(ListViewItem item)
+        {
+            ListBox.ScrollIntoView(item);
+        }
 
     }
 }
