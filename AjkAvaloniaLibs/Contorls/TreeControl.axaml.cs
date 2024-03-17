@@ -42,6 +42,12 @@ namespace AjkAvaloniaLibs.Contorls
             }
         }
 
+        public TreeNode? GetSelectedNode()
+        {
+            TreeNode? selected = TreeView.SelectedItem as TreeNode;
+            return selected;
+        }
+
         // クリックハンドラ
         private void TreeView_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
