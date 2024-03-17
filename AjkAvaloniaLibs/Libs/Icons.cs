@@ -19,6 +19,17 @@ namespace AjkAvaloniaLibs.Libs
         // 一度使ったimageは保持しておく
         public static Dictionary<string, IImage> iconImages = new Dictionary<string, IImage>();
 
+        public enum ColorStyle : int
+        {
+            Original = 0,
+            Gray = 1,
+            Red = 2,
+            Blue = 3,
+            Green = 4,
+            White = 5,
+            Orange = 6,
+        }
+
         /// <summary>
         /// Assets/Icons/以下の(iconName).svgをIImage形式にして取り出す。
         /// 一度使ったIImageはキャッシュする。
