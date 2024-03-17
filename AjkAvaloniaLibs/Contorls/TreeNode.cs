@@ -164,6 +164,12 @@ namespace AjkAvaloniaLibs.Contorls
                 treeNode.Parent = null;
             }
 
+            public void Insert(int index, TreeNode node)
+            {
+                nodes.Insert(index, node);
+                node.Parent = parent;
+            }
+
             public IEnumerator<TreeNode> GetEnumerator()
             {
                 return ((IEnumerable<TreeNode>)nodes).GetEnumerator();
