@@ -24,6 +24,7 @@ namespace AjkAvaloniaLibs.Contorls
             Text = text;
         }
 
+
         // 子ノード
         public TreeNodes Nodes;
 
@@ -168,6 +169,11 @@ namespace AjkAvaloniaLibs.Contorls
             {
                 nodes.Insert(index, node);
                 node.Parent = parent;
+            }
+
+            public void Clear()
+            {
+                nodes.Clear();
             }
 
             public IEnumerator<TreeNode> GetEnumerator()
