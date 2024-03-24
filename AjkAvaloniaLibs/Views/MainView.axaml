@@ -20,6 +20,10 @@
 		<TabItem Header="Tree">
 			<controls:TreeControl Name="Tree1"/>
 		</TabItem>
+
+		<TabItem Header="ColorLabel">
+			<controls:ColorLabelControl Name="ColorLabel1"/>
+		</TabItem>
 	</TabControl>
 
 </UserControl>

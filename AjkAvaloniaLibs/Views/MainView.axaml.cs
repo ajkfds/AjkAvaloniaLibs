@@ -33,5 +33,13 @@ public partial class MainView : UserControl
         node1.Nodes.Add(node3);
         node3.Nodes.Add(node4);
 
+        // Color Label
+        ColorLabel label = new ColorLabel();
+        label.AppendText("Block1");
+        label.AppendText("Bl\r\nock2",Avalonia.Media.Colors.Red);
+        label.AppendText("Block3",Avalonia.Media.Colors.Blue);
+
+        ColorLabel1.Add(label);
+
     }
 }

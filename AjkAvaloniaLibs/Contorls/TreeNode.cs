@@ -28,7 +28,7 @@ namespace AjkAvaloniaLibs.Contorls
         public TreeNodes Nodes;
 
         // アイコン画像
-        private IImage? bitmap = null;
+        private IImage? bitmap = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/paper.svg");
         public virtual IImage? Image
         {
             get
