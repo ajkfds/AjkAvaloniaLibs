@@ -51,7 +51,11 @@
 				<Setter Property="Width" Value="10"></Setter>
 				<Setter Property="Height" Value="10"></Setter>
 			</Style>
-			
+
+			<Style Selector="ScrollBar">
+				<Setter Property="AllowAutoHide" Value="false" />
+				<Setter Property="Background" Value="Cyan" />
+			</Style>		
 		</TreeView.Styles>
 	</TreeView>
 </UserControl>

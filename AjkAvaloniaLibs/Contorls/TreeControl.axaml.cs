@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Generators;
+using System;
 
 namespace AjkAvaloniaLibs.Contorls
 {
@@ -49,6 +50,7 @@ namespace AjkAvaloniaLibs.Contorls
         }
 
         // クリックハンドラ
+        public Action<TreeNode> NodeClicked;
         private void TreeView_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
             TreeNode? node = getTreeNode(e.Source);
@@ -57,6 +59,7 @@ namespace AjkAvaloniaLibs.Contorls
                 System.Diagnostics.Debug.Print(e.ToString());
             }
             if (node == null) return;
+            if (NodeClicked != null) NodeClicked(node);
             node.OnClicked();
         }
 
