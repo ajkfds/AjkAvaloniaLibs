@@ -248,7 +248,7 @@ namespace AjkAvaloniaLibs.Libs.Json
 
             while (nextChar !='\"')
             {
-                if(nextChar == '\\') // escape
+                if(nextChar == System.IO.Path.DirectorySeparatorChar) // escape
                 {
                     if (streamReader.EndOfStream) throw new Exception("illegal format");
                     nextChar = (char)streamReader.Read();
