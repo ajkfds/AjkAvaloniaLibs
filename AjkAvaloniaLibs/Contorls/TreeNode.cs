@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace AjkAvaloniaLibs.Contorls
 {
@@ -39,6 +40,7 @@ namespace AjkAvaloniaLibs.Contorls
             set
             {
                 bitmap = value;
+                NotifyPropertyChanged();
             }
         }
 
@@ -126,6 +128,7 @@ namespace AjkAvaloniaLibs.Contorls
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
 
         // 子ノードを保持するクラス
         // Parenetを保持するためにクラスを実装するs

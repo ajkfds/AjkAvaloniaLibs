@@ -12,6 +12,7 @@ namespace AjkAvaloniaLibs.Contorls
             InitializeComponent();
             // DataContextÇÃViewModelÇÃê›íË
             TreeView.DataContext = new TreeControlViewModel();
+            TreeView.AutoScrollToSelectedItem = false;
 
             if (Design.IsDesignMode)
             {
