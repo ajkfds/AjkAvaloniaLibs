@@ -25,6 +25,14 @@ namespace AjkAvaloniaLibs.Contorls
             return items;
         }
 
+        public int ItemCount
+        {
+            get
+            {
+                return items.Count;
+            }
+        }
+
         private List<labelItem> items = new List<labelItem>();
 
         public interface labelItem
