@@ -28,7 +28,7 @@
 		</TreeView.ItemTemplate>
 
 		<TreeView.Resources> 
-			<!-- expand/collapse 変更用 icon定義 -->
+			 <!--expand/collapse 変更用 icon定義--> 
 			<StreamGeometry x:Key="TreeViewItemCollapsedChevronPathData">M 0,4 4,4 4,0 6,0 6,4 10,4 10,6 6,6 6,10 4,10 4,6 0,6 0,4 Z</StreamGeometry>
 			<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M 0,4 10,4 10,6 0,6 Z</StreamGeometry>
 		</TreeView.Resources> 
@@ -46,10 +46,6 @@
 			</Style>
 			<Style Selector="ToggleButton:unchecked /template/ Path#ChevronPath">
 				<Setter Property="Data" Value="{StaticResource TreeViewItemCollapsedChevronPathData}" />
-			</Style>
-			<Style Selector="TreeViewItem /template/ ToggleButton#PART_ExpandCollapseChevron">
-				<Setter Property="Width" Value="10"></Setter>
-				<Setter Property="Height" Value="10"></Setter>
 			</Style>
 
 			<Style Selector="ScrollBar">

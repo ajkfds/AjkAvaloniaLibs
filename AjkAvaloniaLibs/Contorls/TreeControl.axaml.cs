@@ -107,6 +107,14 @@ namespace AjkAvaloniaLibs.Contorls
                 if (treeViewItem == null) return null;
                 return treeViewItem.DataContext as TreeNode;
             }
+            else if(target is Border)
+            {
+                Border? border = target as Border;
+                if (border == null) return null;
+                Control? child = border.Child;
+                if (child == null) return null;
+                return getTreeNode(child.DataContext);
+            }
             else
             { // ÇŸÇµÇ¢objectÇ™å©Ç¬Ç©ÇÁÇ»Ç©Ç¡ÇΩèÍçá
                 return null;
