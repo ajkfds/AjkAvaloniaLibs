@@ -78,6 +78,10 @@ namespace AjkAvaloniaLibs.Contorls
         {
             TreeNode? node = getTreeNode(e.Source);
             if (node == null) return;
+            if (node._nodes.Count > 0)
+            {
+                node.IsExpanded = !node.IsExpanded;
+            }
             node.OnDoubleClicked();
         }
 
@@ -114,6 +118,18 @@ namespace AjkAvaloniaLibs.Contorls
                 Control? child = border.Child;
                 if (child == null) return null;
                 return getTreeNode(child.DataContext);
+            }
+            else if(target is Avalonia.Controls.Presenters.ContentPresenter)
+            {
+                Avalonia.Controls.Presenters.ContentPresenter? presenter = target as Avalonia.Controls.Presenters.ContentPresenter;
+                if (presenter == null) return null;
+                if(presenter.Content is TreeNode)
+                {
+                    TreeNode? node = presenter.Content as TreeNode;
+                    if(node == null) return null;
+                    return node;
+                }
+                return null;
             }
             else
             { // ÇŸÇµÇ¢objectÇ™å©Ç¬Ç©ÇÁÇ»Ç©Ç¡ÇΩèÍçá

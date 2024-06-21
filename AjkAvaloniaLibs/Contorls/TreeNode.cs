@@ -150,6 +150,7 @@ namespace AjkAvaloniaLibs.Contorls
                 this.parent = parent;
             }
 
+
             public ReadOnlyObservableCollection<TreeNode> ReadOnlyNodes
             {
                 get { return rNodes; }
