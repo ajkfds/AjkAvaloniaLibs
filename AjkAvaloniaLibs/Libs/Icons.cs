@@ -14,6 +14,10 @@ using Svg.Skia;
 using Avalonia.Skia;
 using Avalonia;
 using System.Runtime.Intrinsics.Arm;
+using ExCSS;
+using Svg;
+using System.Drawing;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AjkAvaloniaLibs.Libs
 {
@@ -74,55 +78,164 @@ namespace AjkAvaloniaLibs.Libs
             return iconImages[iconName];
         }
 
+        //public static Bitmap GetSvgBitmap(
+        //    string SvgPath1, Avalonia.Media.Color color1,
+        //    string SvgPath2, Avalonia.Media.Color color2
+        //    )
+        //{
+        //    string iconName1 = SvgPath1.Substring(SvgPath1.LastIndexOf('/') + 1);
+        //    if (!SvgPath1.ToLower().EndsWith(".svg")) throw new Exception();
+        //    iconName1 = iconName1.Substring(0, iconName1.Length - 4);
+        //    iconName1 += color1.ToString();
+
+        //    string iconName2 = SvgPath2.Substring(SvgPath2.LastIndexOf('/') + 1);
+        //    if (!SvgPath2.ToLower().EndsWith(".svg")) throw new Exception();
+        //    iconName2 = iconName2.Substring(0, iconName2.Length - 4);
+        //    iconName2 += color2.ToString();
+
+        //    string iconName = iconName1 + iconName2;
+        //    if (iconImages.ContainsKey(iconName)) return iconImages[iconName];
+
+        //    SKBitmap skBitmap1 = getSkBitmapFromSvg(SvgPath1, 1f,1f, color1);
+        //    SKBitmap skBitmap2 = getSkBitmapFromSvg(SvgPath2, 0.5f,0.5f,color2);
+
+        //    using SKCanvas canvas = new SKCanvas(skBitmap1);
+        //    var pixelSize = new PixelSize((int)skBitmap1.Width, (int)skBitmap1.Height);
+
+        //    canvas?.DrawBitmap(skBitmap1, 0, 0);// paint);
+
+        //    using var paint = new SKPaint
+        //    {
+        //        ColorFilter = SKColorFilter.CreateBlendMode(
+        //            color2.ToSKColor(),
+        //            SKBlendMode.SrcOver
+        //            )
+        //    };
+        //    canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 2, 0);//, paint);
+
+        //    Bitmap bmp = getBitmapFromSKBitmap(skBitmap1);
+
+        //    lock (iconImages)
+        //    {
+        //        iconImages.Add(iconName, bmp);
+        //    }
+
+        //    return iconImages[iconName];
+        //}
+
+        public enum OverridePosition
+        {
+            Fill,
+            Center,
+            UpLeft,
+            UpRight,
+            DownLeft,
+            DownRight
+        }
+
+        public class OverrideIcon
+        {
+            [SetsRequiredMembers]
+            public OverrideIcon() { }
+            public required string SvgPath { get; init; }
+            public required Avalonia.Media.Color Color { get; init; }
+            public required OverridePosition OverridePosition { get; init; }
+
+            public string ID
+            {
+                get
+                {
+                    return SvgPath + Color.ToString() + OverridePosition.ToString();
+                }
+            }
+        }
+
         public static Bitmap GetSvgBitmap(
             string SvgPath1, Avalonia.Media.Color color1,
             string SvgPath2, Avalonia.Media.Color color2
             )
         {
-            string iconName1 = SvgPath1.Substring(SvgPath1.LastIndexOf('/') + 1);
+            return GetSvgBitmap(SvgPath1, color1,
+                new List<OverrideIcon> { new OverrideIcon() { SvgPath = SvgPath2, Color = color2, OverridePosition = OverridePosition.UpRight } }
+                ); 
+        }
+        public static Bitmap GetSvgBitmap(
+        string SvgPath1, Avalonia.Media.Color color1,
+        List<OverrideIcon> overrideIcons
+        )
+        {
+            string iconName = SvgPath1.Substring(SvgPath1.LastIndexOf('/') + 1);
             if (!SvgPath1.ToLower().EndsWith(".svg")) throw new Exception();
-            iconName1 = iconName1.Substring(0, iconName1.Length - 4);
-            iconName1 += color1.ToString();
+            iconName= iconName.Substring(0, iconName.Length - 4);
+            iconName += color1.ToString();
 
-            string iconName2 = SvgPath2.Substring(SvgPath2.LastIndexOf('/') + 1);
-            if (!SvgPath2.ToLower().EndsWith(".svg")) throw new Exception();
-            iconName2 = iconName2.Substring(0, iconName2.Length - 4);
-            iconName2 += color2.ToString();
-
-            string iconName = iconName1 + iconName2;
+            foreach (OverrideIcon icon in overrideIcons)
+            {
+                iconName += icon.ID;
+            }
             if (iconImages.ContainsKey(iconName)) return iconImages[iconName];
 
-            SKBitmap skBitmap1 = getSkBitmapFromSvg(SvgPath1, 1f,1f, color1);
-            SKBitmap skBitmap2 = getSkBitmapFromSvg(SvgPath2, 0.5f,0.5f,color2);
+            SKBitmap skBitmap1 = getSkBitmapFromSvg(SvgPath1, 1f, 1f, color1);
 
             using SKCanvas canvas = new SKCanvas(skBitmap1);
             var pixelSize = new PixelSize((int)skBitmap1.Width, (int)skBitmap1.Height);
-//            var dpi = new Vector(96, 96);
-//            using var colorizedRenderTarget = new RenderTargetBitmap(pixelSize, dpi);
-//            using var colorizedContextImpl = colorizedRenderTarget.CreateDrawingContext();
-//            using var colorizedSkiaContext = colorizedContextImpl;
+            canvas?.DrawBitmap(skBitmap1, 0, 0);
 
-            canvas?.DrawBitmap(skBitmap1, 0, 0);// paint);
-
-            using var paint = new SKPaint
+            foreach(OverrideIcon icon in overrideIcons)
             {
-                ColorFilter = SKColorFilter.CreateBlendMode(
-                    color2.ToSKColor(),
-                    SKBlendMode.SrcOver
-                    )
-            };
-            canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 2, 0);//, paint);
+                string iconName2 = icon.SvgPath.Substring(icon.SvgPath.LastIndexOf('/') + 1);
+                if (!icon.SvgPath.ToLower().EndsWith(".svg")) throw new Exception();
+                iconName2 = iconName2.Substring(0, iconName2.Length - 4);
+                iconName2 += icon.Color.ToString();
+                float size = 1;
+                switch (icon.OverridePosition)
+                {
+                    case OverridePosition.Fill:
+                        size = 1;
+                        break;
+                    default:
+                        size = 0.5f;
+                        break;
+                }
+                SKBitmap skBitmap2 = getSkBitmapFromSvg(icon.SvgPath, size, size, icon.Color);
+                using var paint = new SKPaint
+                {
+                    ColorFilter = SKColorFilter.CreateBlendMode(
+                        icon.Color.ToSKColor(),
+                        SKBlendMode.SrcOver
+                        )
+                };
+                switch (icon.OverridePosition)
+                {
+                    case OverridePosition.Fill:
+                    case OverridePosition.UpLeft:
+                        canvas?.DrawBitmap(skBitmap2, 0, 0);
+                        break;
+                    case OverridePosition.UpRight:
+                        canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 2, 0);
+                        break;
+                    case OverridePosition.Center:
+                        canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 4, skBitmap1.Height/4);
+                        break;
+                    case OverridePosition.DownLeft:
+                        canvas?.DrawBitmap(skBitmap2, 0, skBitmap1.Height/2);
+                        break;
+                    case OverridePosition.DownRight:
+                        canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 2, skBitmap1.Height / 2);
+                        break;
+                }
+
+            }
 
             Bitmap bmp = getBitmapFromSKBitmap(skBitmap1);
+
 
             lock (iconImages)
             {
                 iconImages.Add(iconName, bmp);
             }
-
             return iconImages[iconName];
         }
-
         private static Bitmap getBitmapFromSKBitmap(SKBitmap skBitmap)
         {
             Bitmap bmp;
