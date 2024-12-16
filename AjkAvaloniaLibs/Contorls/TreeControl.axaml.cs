@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Generators;
+using Avalonia.VisualTree;
 using System;
+using System.Linq;
 
 namespace AjkAvaloniaLibs.Contorls
 {
@@ -27,10 +29,22 @@ namespace AjkAvaloniaLibs.Contorls
                 Nodes.Add(node2);
                 Nodes.Add(node3);
 
+                //for(int i = 0; i < 100; i++)
+                //{
+                //    TreeNode node = new TreeNode("TestNode_______________________________________"+i.ToString());
+                //    Nodes.Add(node);
+                //}
+
                 node1.Nodes.Add(node4);
                 node1.Nodes.Add(node5);
 
                 node2.Nodes.Add(node6);
+            }
+
+            ScrollViewer? scrollViewer = TreeView.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+            if(scrollViewer != null)
+            {
+            //    scrollViewer.set = new Avalonia.Size(10, 10);
             }
         }
 

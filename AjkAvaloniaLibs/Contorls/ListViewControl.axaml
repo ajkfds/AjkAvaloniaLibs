@@ -6,8 +6,8 @@
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
              x:Class="AjkAvaloniaLibs.Contorls.ListViewControl">
 	<ListBox
-		Name="ListBox"
-        x:DataType="ctrl:ListViewControlViewModel"
+		Name="ListBox0"
+        x:DataType="ctrl:ListViewControl"
         ItemsSource="{Binding Items}"
         >
 		<ListBox.ItemTemplate>
@@ -20,20 +20,12 @@
 						   Height="8"
 						   FontSize="8"
 						   Margin="0 0 0 0"
+						   Padding="0"
 						   />
-				<!--<Border BorderBrush="Blue" BorderThickness="1"
-						CornerRadius="4" Padding="4">
-					<TextBlock Text="{Binding Text}"/>
-				</Border>-->
 			</DataTemplate>
 		</ListBox.ItemTemplate>
 
-		<ListBox.Styles>
-			<Style Selector="ListBoxItem">
-				<Setter Property="MinHeight" Value="8"/>
-				<Setter Property="Height" Value="15"/>
-			</Style>
-		</ListBox.Styles>
+
 	</ListBox>
 	
 </UserControl>

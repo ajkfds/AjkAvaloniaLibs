@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:ctrl="clr-namespace:AjkAvaloniaLibs.Contorls;assembly=AjkAvaloniaLibs"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
+             mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="400"
              x:Class="AjkAvaloniaLibs.Contorls.TreeControl">
 	<TreeView
         Name="TreeView"
@@ -32,6 +32,7 @@
 			<StreamGeometry x:Key="TreeViewItemCollapsedChevronPathData">M 0,4 4,4 4,0 6,0 6,4 10,4 10,6 6,6 6,10 4,10 4,6 0,6 0,4 Z</StreamGeometry>
 			<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M 0,4 10,4 10,6 0,6 Z</StreamGeometry>
 		</TreeView.Resources> 
+		
 		<TreeView.Styles>
 			<Style Selector="TreeViewItem">
 				<!-- IsExpanded Propertyを更新する -->

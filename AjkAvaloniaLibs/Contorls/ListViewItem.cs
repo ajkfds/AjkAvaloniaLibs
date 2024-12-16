@@ -60,6 +60,9 @@ namespace AjkAvaloniaLibs.Contorls
             }
         }
 
+        //public int Height { get; set; }
+        //public int FontSize { get; set; }
+
 
         public Avalonia.Media.Color ForeColor { get; set; } 
         public Avalonia.Media.Color BackColor { get; set; } 
