@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:AjkAvaloniaLibs.ViewModels"
-             xmlns:controls="clr-namespace:AjkAvaloniaLibs.Contorls;assembly=AjkAvaloniaLibs"
+             xmlns:controls="clr-namespace:AjkAvaloniaLibs.Controls;assembly=AjkAvaloniaLibs"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
              x:Class="AjkAvaloniaLibs.Views.MainView"
              x:DataType="vm:MainViewModel">

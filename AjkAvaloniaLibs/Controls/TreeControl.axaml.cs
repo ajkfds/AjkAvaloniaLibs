@@ -4,7 +4,7 @@ using Avalonia.VisualTree;
 using System;
 using System.Linq;
 
-namespace AjkAvaloniaLibs.Contorls
+namespace AjkAvaloniaLibs.Controls
 {
     public partial class TreeControl : UserControl
     {

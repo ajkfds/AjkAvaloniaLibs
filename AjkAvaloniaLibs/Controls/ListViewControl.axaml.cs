@@ -4,7 +4,7 @@ using Avalonia.Styling;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace AjkAvaloniaLibs.Contorls
+namespace AjkAvaloniaLibs.Controls
 {
     public partial class ListViewControl : UserControl
     {

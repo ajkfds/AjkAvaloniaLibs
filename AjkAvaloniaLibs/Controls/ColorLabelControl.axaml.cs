@@ -4,7 +4,7 @@ using Avalonia.Media;
 using DynamicData;
 using System.Reflection.Emit;
 
-namespace AjkAvaloniaLibs.Contorls
+namespace AjkAvaloniaLibs.Controls
 {
     public partial class ColorLabelControl : UserControl
     {

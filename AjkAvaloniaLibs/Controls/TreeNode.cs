@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace AjkAvaloniaLibs.Contorls
+namespace AjkAvaloniaLibs.Controls
 {
     public class TreeNode : INotifyPropertyChanged
     {
