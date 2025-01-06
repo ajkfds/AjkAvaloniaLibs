@@ -23,6 +23,7 @@ namespace AjkAvaloniaLibs.Controls
             InitializeComponent();
 
             var browserWrapper = this.FindControl<Decorator>("browserWrapper");
+            if (browserWrapper == null) throw new Exception();
 
             browser = new AvaloniaCefBrowser();
             browser.Address = "https://www.google.com";
@@ -168,6 +169,12 @@ namespace AjkAvaloniaLibs.Controls
                 });
                 return true;
             }
+        }
+
+        private void MenuItem_OpenDevTools_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (browser == null) return;
+            browser.ShowDeveloperTools();
         }
     }
 }

@@ -5,6 +5,11 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="AjkAvaloniaLibs.Controls.BrowserViewControl">
 	<DockPanel>
+		<Menu DockPanel.Dock="Top" Name="Menu" FontSize="12">
+			<MenuItem Header="_Tool" Name="MenuItem_Tool">
+				<MenuItem Header="_OpenDevTools" Name="MenuItem_OpenDevTools" Click="MenuItem_OpenDevTools_Click"/>
+			</MenuItem>
+		</Menu>
 		<TextBox x:Name="addressTextBox" DockPanel.Dock="Top" />
 		<Decorator x:Name="browserWrapper"/>
 	</DockPanel>
