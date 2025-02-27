@@ -1,8 +1,12 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Generators;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using static AjkAvaloniaLibs.Controls.TreeNode;
 
 namespace AjkAvaloniaLibs.Controls
 {
@@ -13,7 +17,7 @@ namespace AjkAvaloniaLibs.Controls
         {
             InitializeComponent();
             // DataContext‚ÌViewModel‚ÌÝ’è
-            TreeView.DataContext = new TreeControlViewModel();
+            TreeView.DataContext = this;
             TreeView.AutoScrollToSelectedItem = false;
 
             if (Design.IsDesignMode)
@@ -46,15 +50,38 @@ namespace AjkAvaloniaLibs.Controls
             {
             //    scrollViewer.set = new Avalonia.Size(10, 10);
             }
+
+            this.AddHandler(PointerWheelChangedEvent, (o, i) =>
+            {
+                if (i.KeyModifiers != KeyModifiers.Control) return;
+                if (i.Delta.Y > 0) FontSize++;
+                else FontSize = FontSize > 1 ? FontSize - 1 : 1;
+            }, RoutingStrategies.Bubble, true);
         }
 
+        // viewmodel
+        public TreeNodes rootNodes = new TreeNodes(null);
+        public ReadOnlyObservableCollection<TreeNode> _nodes
+        {
+            get { return Nodes.ReadOnlyNodes; }
+        }
+
+        public double LineHeight {
+            get
+            {
+                return FontSize+2;
+            }
+        }
+
+
+        //
         public TreeNode.TreeNodes Nodes
         {
             get
             {
-                TreeControlViewModel? viewModel = TreeView.DataContext as TreeControlViewModel;
-                if (viewModel == null) throw new System.Exception();
-                return viewModel.Nodes;
+                //                TreeControlViewModel? viewModel = TreeView.DataContext as TreeControlViewModel;
+                //                if (viewModel == null) throw new System.Exception();
+                return rootNodes;
             }
         }
 

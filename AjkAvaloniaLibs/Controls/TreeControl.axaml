@@ -7,7 +7,7 @@
              x:Class="AjkAvaloniaLibs.Controls.TreeControl">
 	<TreeView
         Name="TreeView"
-        x:DataType="ctrl:TreeControlViewModel"
+        x:DataType="ctrl:TreeControl"
         ItemsSource="{Binding _nodes}"
 		Tapped="TreeView_Tapped"
 		DoubleTapped="TreeView_DoubleTapped"
@@ -20,9 +20,9 @@
                 ItemsSource="{Binding _nodes}"
             >
 				<!-- ItemはImageとTextBlockを横に並べた構造にする -->
-				<StackPanel Orientation="Horizontal" Height ="14">
-					<Image Source="{Binding Image}" Width="12" Height="12"/>
-					<TextBlock Text="{Binding Text}" Margin="4 0 0 0" FontSize="10" />
+				<StackPanel Orientation="Horizontal" Height="{Binding LineHeight}">
+					<Image Source="{Binding Image}" Width="12" Height="{Binding LineHeight}"/>
+					<TextBlock Text="{Binding Text}" Margin="4 0 0 0" FontSize="{Binding FontSize}" />
 				</StackPanel>
 			</TreeDataTemplate>
 		</TreeView.ItemTemplate>
