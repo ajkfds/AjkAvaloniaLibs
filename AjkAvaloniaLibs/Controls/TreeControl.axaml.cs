@@ -59,6 +59,42 @@ namespace AjkAvaloniaLibs.Controls
             }, RoutingStrategies.Bubble, true);
         }
 
+        // Workaround for the issue where the bottom item may be hidden under the horizontal scrollbar
+        // and becomes unclickable when scrolled to the lower limit.
+        // Extends the scrollable range to allow further scrolling below the limit.
+        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+        {
+            base.OnPointerWheelChanged(e);
+
+            var scrollViewer = this.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+
+            if (scrollViewer != null)
+            {
+                var extentHeight = scrollViewer.Extent.Height;
+                var viewportHeight = scrollViewer.Viewport.Height;
+
+                var currentOffset = scrollViewer.Offset.Y;
+                var maxOffset = scrollViewer.Extent.Height - scrollViewer.Viewport.Height;
+
+                if (currentOffset >= maxOffset) // max position
+                {
+                    var content = scrollViewer.Content as Control;
+                    if (content != null)
+                    {
+                        content.Height = extentHeight + LineHeight;
+                    }
+                }
+                else if (currentOffset < maxOffset)
+                {
+                    var content = scrollViewer.Content as Control;
+                    if (content != null)
+                    {
+                        content.Height = extentHeight;
+                    }
+                }
+            }
+        }
+
         // viewmodel
         public TreeNodes rootNodes = new TreeNodes(null);
         public ReadOnlyObservableCollection<TreeNode> _nodes

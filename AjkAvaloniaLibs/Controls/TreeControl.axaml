@@ -12,6 +12,7 @@
 		Tapped="TreeView_Tapped"
 		DoubleTapped="TreeView_DoubleTapped"
 		SelectionChanged="TreeView_SelectionChanged"
+		Margin="4 4 4 4"
         >
 
 		<TreeView.ItemTemplate>
