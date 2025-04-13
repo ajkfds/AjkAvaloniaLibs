@@ -1,0 +1,85 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:ctrl="clr-namespace:AjkAvaloniaLibs.Controls;assembly=AjkAvaloniaLibs"
+             x:Class="AjkAvaloniaLibs.Controls.TreeControl2"
+			 x:DataType="ctrl:TreeControl2ViewModel"
+			 >
+	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
+		<TreeDataGrid Source="{Binding NodesSource}" Name="Tree">
+			<TreeDataGrid.Resources>
+				<!--expand/collapse 変更用 icon定義-->
+				<StreamGeometry x:Key="TreeViewItemCollapsedChevronPathData">M 0,4 4,4 4,0 6,0 6,4 10,4 10,6 6,6 6,10 4,10 4,6 0,6 0,4 Z</StreamGeometry>
+				<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M 0,2 10,2 10,-2 0,-2 Z</StreamGeometry>
+			</TreeDataGrid.Resources>
+			
+			<TreeDataGrid.Styles>
+
+				<Style Selector="Border#CellBorder > DockPanel > Border">
+					<Setter Property="Background" Value="Red"/>
+				</Style>
+				
+				<Style Selector="TreeDataGridRow">
+					<Setter Property="MinHeight" Value="0"/>
+					<!--<Setter Property="MaxHeight" Value="100"/>-->
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Margin" Value="0"/>
+				</Style>
+				<Style Selector="TreeDataGridExpanderCell">
+					<Setter Property="MinHeight" Value="0"/>
+					<!--<Setter Property="MaxWidth" Value="100"/>-->
+				</Style>
+				<Style Selector="TextBlock">
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="MinHeight" Value="0"/>
+				</Style>
+				
+				
+				<Style Selector="Border#CellBorder > DockPanel > Border > ToggleButton">
+					<Setter Property="Background" Value="Blue"/>
+					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+				</Style>
+
+				<Style Selector="Border#CellBorder > DockPanel > Border > ToggleButton > Border">
+					<Setter Property="Background" Value="Blue"/>
+					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+				</Style>
+
+				<Style Selector="ToggleButton">
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="HorizontalAlignment" Value="Center"/>
+					<Setter Property="MinHeight" Value="0"/>
+					<!--<Setter Property="MaxHeight" Value="100"/>-->
+					<Setter Property="MaxWidth" Value="100"/>
+				</Style>
+				<!-- expand/collapse 変更用 icon変更 -->
+				<Style Selector="ToggleButton:checked /template/ Path#ChevronPath">
+					<Setter Property="Data" Value="{StaticResource TreeViewItemExpandedChevronPathData}" />
+					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="MinHeight" Value="0"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="Stretch" Value="Uniform"/>
+					<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+				</Style>
+				<Style Selector="ToggleButton:unchecked /template/ Path#ChevronPath">
+					<Setter Property="Data" Value="{StaticResource TreeViewItemCollapsedChevronPathData}" />
+					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="MinHeight" Value="0"/>
+					<Setter Property="VerticalAlignment" Value="Center"/>
+					<Setter Property="Stretch" Value="Uniform"/>
+					<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+				</Style>
+
+			</TreeDataGrid.Styles>
+			
+		</TreeDataGrid>
+
+	</ScrollViewer>
+</UserControl>

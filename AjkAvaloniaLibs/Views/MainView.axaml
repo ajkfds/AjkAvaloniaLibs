@@ -21,8 +21,15 @@
 			<controls:TreeControl Name="Tree1"/>
 		</TabItem>
 
+		<TabItem Header="Tree2">
+			<controls:TreeControl2 Name="Tree2"/>
+		</TabItem>
+		
 		<TabItem Header="ColorLabel">
 			<controls:ColorLabelControl Name="ColorLabel1"/>
+		</TabItem>
+		<TabItem Header="Grid">
+			<controls:GridControl></controls:GridControl>
 		</TabItem>
 	</TabControl>
 
