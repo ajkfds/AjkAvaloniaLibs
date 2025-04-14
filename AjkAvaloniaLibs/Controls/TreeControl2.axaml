@@ -24,9 +24,7 @@
 					<Setter Property="Margin" Value="0"/>
 				</Style>
 
-				<Style Selector="TreeDataGridExpanderCell">
-					<Setter Property="MinHeight" Value="0"/>
-				</Style>
+				
 				<Style Selector="TextBlock">
 					<Setter Property="VerticalAlignment" Value="Center"/>
 					<Setter Property="MinHeight" Value="0"/>
@@ -42,18 +40,21 @@
 					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
 				</Style>
 
-				<Style Selector="Border#CellBorder > DockPanel > Border > ToggleButton > Border">
+				<!--<Style Selector="Border#CellBorder > DockPanel > Border > ToggleButton >Border">
 					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
 					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
-				</Style>
-
-				<Style Selector="ToggleButton">
-					<Setter Property="VerticalAlignment" Value="Center"/>
-					<Setter Property="HorizontalAlignment" Value="Center"/>
+				</Style>-->
+				
+				<Style Selector="TreeDataGridExpanderCell">
 					<Setter Property="MinHeight" Value="0"/>
 				</Style>
+				
+				<!--<Style Selector="TreeDataGridExpanderCell /template/ Border#ShiftBox">
+					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+				</Style>-->
 
-
+				<!-- fix TreeDataGridExpanderCell template to eliminate CellBorder.DockPanel.Border.With/Height -->
 				<Style Selector="TreeDataGridExpanderCell">
 					<Setter Property="Template">
 						<ControlTemplate>
@@ -62,11 +63,13 @@
 									BorderBrush="{TemplateBinding BorderBrush}"
 									BorderThickness="{TemplateBinding BorderThickness}"
 									CornerRadius="{TemplateBinding CornerRadius}"
+									Padding="{TemplateBinding Indent, Converter={x:Static ctrl:IndentConverter.Instance}}"
 									>
 								<DockPanel>
-									<Border DockPanel.Dock="Left"
-											Margin="4 0">
-										<!--Width="40" Height="12">-->
+									<Border x:Name="ShiftBox"
+											DockPanel.Dock="Left"
+											Margin="4 0"
+											Width="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" Height="12">
 										<ToggleButton Theme="{StaticResource TreeDataGridExpandCollapseChevron}"
 													  Focusable="False"
 													  IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}"
@@ -79,24 +82,12 @@
 					</Setter>
 				</Style>
 
-					<!-- expand/collapse 変更用 icon変更 -->
+				<!-- expand/collapse icon shape 変更 -->
 				<Style Selector="ToggleButton:checked /template/ Path#ChevronPath">
 					<Setter Property="Data" Value="{StaticResource TreeViewItemExpandedChevronPathData}" />
-					<!--<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
-					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
-					<Setter Property="MinHeight" Value="0"/>
-					<Setter Property="VerticalAlignment" Value="Center"/>
-					<Setter Property="Stretch" Value="Uniform"/>
-					<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>-->
 				</Style>
 				<Style Selector="ToggleButton:unchecked /template/ Path#ChevronPath">
 					<Setter Property="Data" Value="{StaticResource TreeViewItemCollapsedChevronPathData}" />
-					<!--<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
-					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
-					<Setter Property="MinHeight" Value="0"/>
-					<Setter Property="VerticalAlignment" Value="Center"/>
-					<Setter Property="Stretch" Value="Uniform"/>
-					<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>-->
 				</Style>
 
 			</TreeDataGrid.Styles>
