@@ -71,7 +71,7 @@ namespace AjkAvaloniaLibs.Controls
                 if (_fontSize == value) return;
                 _fontSize = value;
                 RowHeight = _fontSize * 1.2;
-                ToggleIconSize = _fontSize * 0.5;
+                ToggleIconHeight = _fontSize * 0.8;
                 OnPropertyChanged(nameof(FontSize));
             }
         }
@@ -91,19 +91,18 @@ namespace AjkAvaloniaLibs.Controls
             }
         }
 
-        private double _toggleIconSize = 50;
-        public double ToggleIconSize
+        private double _toggleIconHeight = 50;
+        public double ToggleIconHeight
         {
             private set
             {
-                if (_toggleIconSize == value) return;
-                _toggleIconSize = value;
-                OnPropertyChanged(nameof(ToggleIconSize));
+                if (_toggleIconHeight == value) return;
+                _toggleIconHeight = value;
+                OnPropertyChanged(nameof(ToggleIconHeight));
             }
             get
             {
-                //                return _toggleIconSize;
-                return 3;
+                return _toggleIconHeight;
             }
         }
 
