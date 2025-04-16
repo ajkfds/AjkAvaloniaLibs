@@ -11,8 +11,8 @@
 		<TreeDataGrid Source="{Binding NodesSource}" Name="Tree">
 			<TreeDataGrid.Resources>
 				<!--expand/collapse 変更用 icon定義-->
-				<StreamGeometry x:Key="TreeViewItemCollapsedChevronPathData">M 0,4 4,4 4,0 6,0 6,4 10,4 10,6 6,6 6,10 4,10 4,6 0,6 0,4 Z</StreamGeometry>
-				<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M 0,2 10,2 10,-2 0,-2 Z</StreamGeometry>
+				<StreamGeometry x:Key="TreeViewItemCollapsedChevronPathData">M -5,-1 -1,-1 -1,-5 1,-5 1,-1 5,-1 5,1 1,1 1,5 -1,5 -1,1 -5,1 -5,-1 Z</StreamGeometry>
+				<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M -5,1 5,1 5,-1 -5,-1 Z</StreamGeometry>
 			</TreeDataGrid.Resources>
 			
 			<TreeDataGrid.Styles>
@@ -20,7 +20,7 @@
 				<Style Selector="TreeDataGridRow">
 					<Setter Property="MinHeight" Value="0"/>
 					<Setter Property="VerticalAlignment" Value="Center"/>
-					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Height" Value="{Binding RowHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
 					<Setter Property="Margin" Value="0"/>
 				</Style>
 
