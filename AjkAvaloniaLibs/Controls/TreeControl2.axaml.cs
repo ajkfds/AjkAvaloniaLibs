@@ -47,8 +47,6 @@ public partial class TreeControl2 : UserControl
 
 
 
-
-
     private void NodesSource_RowCollapsed(object? sender, Avalonia.Controls.Models.TreeDataGrid.RowEventArgs<Avalonia.Controls.Models.TreeDataGrid.HierarchicalRow<TreeNode>> e)
     {
         TreeNode? node = e.Row.Model as TreeNode;

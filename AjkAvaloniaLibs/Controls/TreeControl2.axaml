@@ -12,7 +12,7 @@
 			<TreeDataGrid.Resources>
 				<!--expand/collapse 変更用 icon定義-->
 				<StreamGeometry x:Key="TreeViewItemCollapsedChevronPathData">M 0,4 4,4 4,0 6,0 6,4 10,4 10,6 6,6 6,10 4,10 4,6 0,6 0,4 Z</StreamGeometry>
-				<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M 0,2 10,2 10,-2 0,-2 Z</StreamGeometry>
+				<StreamGeometry x:Key="TreeViewItemExpandedChevronPathData">M 0,1 10,1 10,-1 0,-1 Z</StreamGeometry>
 			</TreeDataGrid.Resources>
 			
 			<TreeDataGrid.Styles>
@@ -20,7 +20,7 @@
 				<Style Selector="TreeDataGridRow">
 					<Setter Property="MinHeight" Value="0"/>
 					<Setter Property="VerticalAlignment" Value="Center"/>
-					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Height" Value="{Binding RowHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
 					<Setter Property="Margin" Value="0"/>
 				</Style>
 
@@ -40,15 +40,15 @@
 					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
 				</Style>
 
-				<!--<Style Selector="Border#CellBorder > DockPanel > Border > ToggleButton >Border">
-					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
-					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
-				</Style>-->
 				
 				<Style Selector="TreeDataGridExpanderCell">
 					<Setter Property="MinHeight" Value="0"/>
 				</Style>
-				
+
+				<!--<Style Selector="Border#CellBorder > DockPanel > Border > ToggleButton >Border">
+					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
+				</Style>-->
 				<!--<Style Selector="TreeDataGridExpanderCell /template/ Border#ShiftBox">
 					<Setter Property="Height" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
 					<Setter Property="Width" Value="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" />
@@ -69,7 +69,9 @@
 									<Border x:Name="ShiftBox"
 											DockPanel.Dock="Left"
 											Margin="4 0"
-											Width="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" Height="12">
+											Width="{Binding FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+											Height="12"
+											>
 										<ToggleButton Theme="{StaticResource TreeDataGridExpandCollapseChevron}"
 													  Focusable="False"
 													  IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}"
@@ -82,13 +84,51 @@
 					</Setter>
 				</Style>
 
+				<Style Selector="ToggleButton">
+					<Setter Property="Margin" Value="0" />
+					<Setter Property="Width" Value="{Binding ToggleIconSize}" />
+					<Setter Property="Height" Value="{Binding ToggleIconSize}" />
+					<Setter Property="Template">
+						<ControlTemplate>
+							<Border Background="Transparent"
+									Width="{Binding ToggleIconSize}"
+									Height="{Binding ToggleIconSize}"
+									HorizontalAlignment="Center"
+									VerticalAlignment="Center">
+								<Path x:Name="ChevronPath"
+									  Data="{StaticResource TreeDataGridItemCollapsedChevronPathData}"
+									  Fill="{TemplateBinding Foreground}"
+									  Stretch="Uniform"
+									  HorizontalAlignment="Center"
+									  VerticalAlignment="Center" />
+							</Border>
+						</ControlTemplate>
+					</Setter>
+					<Style Selector="^:checked /template/ Path#ChevronPath">
+						<Setter Property="Data" Value="{StaticResource TreeViewItemExpandedChevronPathData}" />
+					</Style>
+					<Style Selector="^:unchecked /template/ Path#ChevronPath">
+						<Setter Property="Data" Value="{StaticResource TreeViewItemCollapsedChevronPathData}" />
+					</Style>
+				</Style>
+
+				<!--<ControlTheme x:Key="TreeDataGridExpandCollapseChevron" TargetType="ToggleButton">
+				</ControlTheme>-->
+
+
 				<!-- expand/collapse icon shape 変更 -->
-				<Style Selector="ToggleButton:checked /template/ Path#ChevronPath">
+				<!--<Style Selector="ToggleButton /template/ Path#ChevronPath">
+					--><!--<Setter Property="Width" Value="{Binding ToggleIconSizex}" />--><!--
+					<Setter Property="Width" Value="5" />
+				</Style>-->
+
+
+				<!--<Style Selector="ToggleButton:checked /template/ Path#ChevronPath">
 					<Setter Property="Data" Value="{StaticResource TreeViewItemExpandedChevronPathData}" />
 				</Style>
 				<Style Selector="ToggleButton:unchecked /template/ Path#ChevronPath">
 					<Setter Property="Data" Value="{StaticResource TreeViewItemCollapsedChevronPathData}" />
-				</Style>
+				</Style>-->
 
 			</TreeDataGrid.Styles>
 			
