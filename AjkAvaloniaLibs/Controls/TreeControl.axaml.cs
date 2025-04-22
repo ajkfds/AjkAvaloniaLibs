@@ -9,6 +9,7 @@ using Avalonia.Styling;
 using DynamicData;
 using DynamicData.Binding;
 using ExCSS;
+using ReactiveUI;
 using Svg;
 using System;
 using System.Collections.ObjectModel;
@@ -20,6 +21,10 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 {
     public TreeControl()
     {
+        ToggleButtonColor = Avalonia.Media.Colors.Gray;
+        SelectedBackgroundColor = Avalonia.Media.Colors.DarkGray;
+        SelectedForegroundColor = Avalonia.Media.Colors.LightGray;
+
         InitializeComponent();
         DataContext = this;
         ListBox0.ItemsSource = this.Items;
@@ -61,8 +66,9 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
     }
 
-    public Avalonia.Media.Color ToggleButtonColor { get; set; } = Avalonia.Media.Colors.White;
-    public Avalonia.Media.Color SelectedItemColor { get; set; } = Avalonia.Media.Colors.SlateBlue;
+    public Avalonia.Media.Color ToggleButtonColor { get; set; }
+    public Avalonia.Media.Color SelectedForegroundColor { get; set; }
+    public Avalonia.Media.Color SelectedBackgroundColor { get; set; }
 
     internal Avalonia.Media.Imaging.Bitmap expandedIcon;
     internal Avalonia.Media.Imaging.Bitmap collaspedIcon;
@@ -232,40 +238,57 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             node.TreeItem = this;
             updateVisual();
         }
+
+        double? prevFontSize = null;
+        bool? prevSelected = null;
         internal void updateVisual()
         {
             if (treeNode == null) return;
-            StackPanel.Height = treeControl.FontSize*1.2;
 
-            ToggleButton.Margin = new Thickness(treeNode.Indent * treeControl.FontSize+ treeControl.FontSize * 0.2, treeControl.FontSize*0.2, treeControl.FontSize*0.2, treeControl.FontSize * 0.2);
+            if(prevFontSize != treeControl.FontSize)
+            {
+                StackPanel.Height = treeControl.FontSize * 1.2;
+                Image.Width = treeControl.FontSize;
+                Image.Height = treeControl.FontSize;
+                Image.Source = treeNode.Image;
+                Image.Margin = new Thickness(0, 0, treeControl.FontSize * 0.2, 0);
 
-            Image.Width = treeControl.FontSize;
-            Image.Height = treeControl.FontSize;
-            Image.Source = treeNode.Image;
-            Image.Margin = new Thickness(0, 0, treeControl.FontSize * 0.2,0);
+                ToggleButton.Margin = new Thickness(treeNode.Indent * treeControl.FontSize + treeControl.FontSize * 0.2, treeControl.FontSize * 0.2, treeControl.FontSize * 0.2, treeControl.FontSize * 0.2);
+
+                prevFontSize = treeControl.FontSize;
+            }
 
             if (treeNode.Nodes.Count == 0)
             {
-                ToggleButton.Source = treeControl.dotIcon;
+                if(ToggleButton.Source != treeControl.dotIcon) ToggleButton.Source = treeControl.dotIcon;
             }
             else if (treeNode.IsExpanded)
             {
-                ToggleButton.Source = treeControl.collaspedIcon;
+                if(ToggleButton.Source != treeControl.collaspedIcon) ToggleButton.Source = treeControl.collaspedIcon;
             }
             else
             {
-                ToggleButton.Source = treeControl.expandedIcon;
+                if(ToggleButton.Source != treeControl.expandedIcon) ToggleButton.Source = treeControl.expandedIcon;
             }
 
             if (treeNode.Selected)
             {
-                TextBlock.Foreground = new SolidColorBrush(treeControl.SelectedItemColor);
+                if(prevSelected != true)
+                {
+                    TextBlock.Foreground = new SolidColorBrush(treeControl.SelectedForegroundColor);
+                    TextBlock.Background = new SolidColorBrush(treeControl.SelectedBackgroundColor);
+                    prevSelected = true;
+                }
             }
             else
             {
-                TextBlock.Foreground = treeControl.Foreground;
+                if (prevSelected != false)
+                {
+                    TextBlock.Foreground = treeControl.Foreground;
+                    TextBlock.Background = treeControl.Background;
+                    prevSelected = false;
+                }
             }
-            InvalidateVisual();
         }
 
         private TreeControl treeControl;
@@ -334,7 +357,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
             MinHeight = 0,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent)
+//            Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent)
         };
 
     }
