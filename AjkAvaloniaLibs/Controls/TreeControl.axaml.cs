@@ -157,6 +157,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         if (selectedNode != null) selectedNode.Selected = false; 
         selectedNode = node;
         selectedNode.Selected = true;
+        selectedNode.OnSelected();
     }
     private TreeNode? selectedNode { get; set; } = null;
 
@@ -271,7 +272,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         private void TreeItem_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
             if (treeNode == null) return;
-            treeControl.nodeTapped(treeNode, e);
+            treeControl.nodeTapped(treeNode, e); // select node
             treeNode.OnClicked();
         }
         private void TreeItem_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
