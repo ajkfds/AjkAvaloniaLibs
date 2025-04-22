@@ -1,218 +1,342 @@
+using AjkAvaloniaLibs.Controls;
+using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Generators;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.VisualTree;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input.TextInput;
+using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using Avalonia.Styling;
+using DynamicData;
+using DynamicData.Binding;
+using ExCSS;
+using Svg;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using static AjkAvaloniaLibs.Controls.TreeNode;
 
-namespace AjkAvaloniaLibs.Controls
+namespace AjkAvaloniaLibs.Controls;
+
+public partial class TreeControl : UserControl,ITreeNodeOwner
 {
-    public partial class TreeControl : UserControl
+    public TreeControl()
     {
-        
-        public TreeControl()
+        InitializeComponent();
+        DataContext = this;
+        ListBox0.ItemsSource = this.Items;
+        updateVisual();
+        Nodes.CollectionChanged += Nodes_CollectionChanged;
+
+        this.AddHandler(PointerWheelChangedEvent, (o, i) =>
         {
-            InitializeComponent();
-            // DataContextのViewModelの設定
-            TreeView.DataContext = this;
-            TreeView.AutoScrollToSelectedItem = false;
+            if (i.KeyModifiers != Avalonia.Input.KeyModifiers.Control) return;
+            if (i.Delta.Y > 0) FontSize++;
+            else FontSize = FontSize > 1 ? FontSize - 1 : 1;
+            FontSize = FontSize;
+            updateVisual();
+        }, Avalonia.Interactivity.RoutingStrategies.Bubble, true);
 
-            if (Design.IsDesignMode)
-            {
-                TreeNode node1 = new TreeNode("TestNode1");
-                TreeNode node2 = new TreeNode("TestNode2");
-                TreeNode node3 = new TreeNode("TestNode3");
-                TreeNode node4 = new TreeNode("TestNode4");
-                TreeNode node5 = new TreeNode("TestNode5");
-                TreeNode node6 = new TreeNode("TestNode5");
+        if (Design.IsDesignMode)
+        {
+            TreeNode node1 = new TreeNode("TestNode1");
+            TreeNode node2 = new TreeNode("TestNode2");
+            TreeNode node3 = new TreeNode("TestNode3");
+            TreeNode node4 = new TreeNode("TestNode4");
 
-                Nodes.Add(node1);
-                Nodes.Add(node2);
-                Nodes.Add(node3);
+            TreeNode node1_1 = new TreeNode("TestNode1-1");
+            TreeNode node1_2 = new TreeNode("TestNode1-2");
 
-                //for(int i = 0; i < 100; i++)
-                //{
-                //    TreeNode node = new TreeNode("TestNode_______________________________________"+i.ToString());
-                //    Nodes.Add(node);
-                //}
+            TreeNode node1_1_1 = new TreeNode("TestNode1-1-1");
 
-                node1.Nodes.Add(node4);
-                node1.Nodes.Add(node5);
+            TreeNode node3_1 = new TreeNode("TestNode3-1");
 
-                node2.Nodes.Add(node6);
-            }
+            Nodes.Add(node1);
+            Nodes.Add(node2);
+            Nodes.Add(node3);
 
-            ScrollViewer? scrollViewer = TreeView.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
-            if(scrollViewer != null)
-            {
-            //    scrollViewer.set = new Avalonia.Size(10, 10);
-            }
+            node1.Nodes.Add(node1_1);
+            node1.Nodes.Add(node1_2);
+            node1_1.Nodes.Add(node1_1_1);
 
-            this.AddHandler(PointerWheelChangedEvent, (o, i) =>
-            {
-                if (i.KeyModifiers != KeyModifiers.Control) return;
-                if (i.Delta.Y > 0) FontSize++;
-                else FontSize = FontSize > 1 ? FontSize - 1 : 1;
-            }, RoutingStrategies.Bubble, true);
+            node3.Nodes.Add(node3_1);
         }
+    }
 
-        // Workaround for the issue where the bottom item may be hidden under the horizontal scrollbar
-        // and becomes unclickable when scrolled to the lower limit.
-        // Extends the scrollable range to allow further scrolling below the limit.
-        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+    public Avalonia.Media.Color ToggleButtonColor { get; set; } = Avalonia.Media.Colors.White;
+    public Avalonia.Media.Color SelectedItemColor { get; set; } = Avalonia.Media.Colors.SlateBlue;
+
+    internal Avalonia.Media.Imaging.Bitmap expandedIcon;
+    internal Avalonia.Media.Imaging.Bitmap collaspedIcon;
+    internal Avalonia.Media.Imaging.Bitmap dotIcon;
+    private void updateVisual()
+    {
+        expandedIcon = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/minus.svg", ToggleButtonColor);
+        collaspedIcon = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/plus.svg", ToggleButtonColor);
+        dotIcon = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/dot.svg", ToggleButtonColor);
+
+        foreach (TreeItem item in Items)
         {
-            base.OnPointerWheelChanged(e);
+            item.updateVisual();
+        }
+    }
+    public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
+    public ObservableCollection<TreeItem> Items { get; set; } = new ObservableCollection<TreeItem>();
 
-            var scrollViewer = this.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
-
-            if (scrollViewer != null)
+    // call this method from all subnode nodes
+    private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        PropageteCollectionChange(this,e);
+    }
+    private void PropageteCollectionChange(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (TreeNode node in e.NewItems)
             {
-                var extentHeight = scrollViewer.Extent.Height;
-                var viewportHeight = scrollViewer.Viewport.Height;
-
-                var currentOffset = scrollViewer.Offset.Y;
-                var maxOffset = scrollViewer.Extent.Height - scrollViewer.Viewport.Height;
-
-                if (currentOffset >= maxOffset) // max position
+                if (node._parent == null)
                 {
-                    var content = scrollViewer.Content as Control;
-                    if (content != null)
+                    node._parent = new WeakReference<ITreeNodeOwner>(this);
+                }
+                node.PropageteCollectionChange += PropageteCollectionChange;
+                node.ReportExpanded += NodeExpanded;
+                node.ReportCollapsed += NodeCollapsed;
+
+                // fix visuals
+                if (node.Parent == null)
+                {
+                    node.Visible = true;
+                }
+                else
+                {
+                    if(node.Parent.Visible & node.Parent.IsExpanded)
                     {
-                        content.Height = extentHeight + LineHeight;
+                        node.Visible = true;
+                    }
+                    else
+                    {
+                        node.Visible = false;
                     }
                 }
-                else if (currentOffset < maxOffset)
+
+                if (node.Visible)
                 {
-                    var content = scrollViewer.Content as Control;
-                    if (content != null)
+                    TreeNode? nextTo = node.NextTo;
+                    if (nextTo == null)
                     {
-                        content.Height = extentHeight;
+                        Items.Insert(0, new TreeItem(node,this));
+                    }
+                    else
+                    {
+                        int index = Items.IndexOf(Items.First(x => x.treeNode == nextTo));
+                        Items.Insert(index + 1, new TreeItem(node,this));
                     }
                 }
             }
         }
-
-        // viewmodel
-        public TreeNodes rootNodes = new TreeNodes(null);
-        public ReadOnlyObservableCollection<TreeNode> _nodes
+        if (e.OldItems != null)
         {
-            get { return Nodes.ReadOnlyNodes; }
-        }
-
-        public double LineHeight {
-            get
+            foreach (TreeNode node in e.OldItems)
             {
-                return FontSize+2;
-            }
-        }
+                node.CollectionChanged -= Nodes_CollectionChanged;
+                node._parent = null;
+                node.PropageteCollectionChange -= PropageteCollectionChange;
+                node.ReportExpanded -= NodeExpanded;
+                node.ReportCollapsed -= NodeCollapsed;
 
-
-        //
-        public TreeNode.TreeNodes Nodes
-        {
-            get
-            {
-                //                TreeControlViewModel? viewModel = TreeView.DataContext as TreeControlViewModel;
-                //                if (viewModel == null) throw new System.Exception();
-                return rootNodes;
-            }
-        }
-
-        public TreeNode? GetSelectedNode()
-        {
-            TreeNode? selected = TreeView.SelectedItem as TreeNode;
-            return selected;
-        }
-
-        // クリックハンドラ
-        public Action<TreeNode> NodeClicked;
-        private void TreeView_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
-        {
-            TreeNode? node = getTreeNode(e.Source);
-            if (node == null)
-            {
-                System.Diagnostics.Debug.Print(e.ToString());
-            }
-            if (node == null) return;
-            if (NodeClicked != null) NodeClicked(node);
-            node.OnClicked();
-        }
-
-
-        // 選択アイテム変更ハンドラ
-        private void TreeView_SelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)
-        {
-            TreeNode? node = getTreeNode(TreeView.SelectedItem);
-            if (node == null) return;
-            node.OnSelected();
-        }
-
-        // ダブルクリック イベントハンドラ
-        private void TreeView_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
-        {
-            TreeNode? node = getTreeNode(e.Source);
-            if (node == null) return;
-            if (node._nodes.Count > 0)
-            {
-                node.IsExpanded = !node.IsExpanded;
-            }
-            node.OnDoubleClicked();
-        }
-
-        // オブジェクトからTreeNodeを取得する
-        private TreeNode? getTreeNode(object? target)
-        {
-            if (target == null) return null;
-            if (target is TreeNode)
-            {
-                return target as TreeNode;
-            }
-            if (target is TextBlock)
-            { // targetがTextBockの場合は親objectを探索する
-                TextBlock? textBlock = target as TextBlock;
-                if (textBlock == null) return null;
-                return getTreeNode(textBlock.Parent);
-            }
-            else if (target is StackPanel)
-            { // targetがStackPanelの場合は親objectを探索する
-                StackPanel? stackPanel = target as StackPanel;
-                if (stackPanel == null) return null;
-                return getTreeNode(stackPanel.Parent);
-            }
-            else if (target is TreeViewItem)
-            { // targetがTreeViewItemの場合はBindされているTreeNodeを取得する
-                TreeViewItem? treeViewItem = target as TreeViewItem;
-                if (treeViewItem == null) return null;
-                return treeViewItem.DataContext as TreeNode;
-            }
-            else if(target is Border)
-            {
-                Border? border = target as Border;
-                if (border == null) return null;
-                Control? child = border.Child;
-                if (child == null) return null;
-                return getTreeNode(child.DataContext);
-            }
-            else if(target is Avalonia.Controls.Presenters.ContentPresenter)
-            {
-                Avalonia.Controls.Presenters.ContentPresenter? presenter = target as Avalonia.Controls.Presenters.ContentPresenter;
-                if (presenter == null) return null;
-                if(presenter.Content is TreeNode)
+                // fix visuals
+                if (node.TreeItem != null)
                 {
-                    TreeNode? node = presenter.Content as TreeNode;
-                    if(node == null) return null;
-                    return node;
+                    Items.Remove(node.TreeItem);
+                    node.TreeItem = null;
                 }
-                return null;
+            }
+        }
+    }
+
+    internal void nodeTapped(TreeNode node, Avalonia.Input.TappedEventArgs e)
+    {
+        if (selectedNode != null) selectedNode.Selected = false; 
+        selectedNode = node;
+        selectedNode.Selected = true;
+    }
+    private TreeNode? selectedNode { get; set; } = null;
+
+    public TreeNode? GetSelectedNode()
+    {
+        return selectedNode;
+    }
+    private void NodeExpanded(TreeNode node)
+    {
+        TreeItem? rootItem = node.TreeItem;
+        if (rootItem == null) throw new Exception("TreeItem is null");
+
+        int index = Items.IndexOf(rootItem) + 1;
+        foreach (TreeNode subnode in node.Nodes)
+        {
+            subnode.Visible = true;
+            TreeItem item = new TreeItem(subnode,this);
+            Items.Insert(index, item);
+            index++;
+        }
+        foreach (TreeNode subnode in node.Nodes)
+        {
+            if (subnode.IsExpanded)
+            {
+                NodeExpanded(subnode);
+            }
+        }
+    }
+    private void NodeCollapsed(TreeNode node)
+    {
+        foreach (TreeNode subnode in node.Nodes)
+        {
+            subnode.Visible = false;
+            if (subnode.TreeItem == null) throw new Exception("TreeItem is null");
+            Items.Remove(subnode.TreeItem);
+            subnode.TreeItem = null;
+        }
+        foreach (TreeNode subnode in node.Nodes)
+        {
+            if (!subnode.IsExpanded) continue;
+            NodeCollapsed(subnode);
+        }
+    }
+
+    public class TreeItem : ListBoxItem
+    {
+        public TreeItem(TreeNode node,TreeControl treeControl)
+        {
+            this.treeControl = treeControl;
+            Content = StackPanel;
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent);
+
+            StackPanel.Children.Add(ToggleButton);
+            StackPanel.Children.Add(Image);
+            StackPanel.Children.Add(TextBlock);
+
+            StackPanel.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
+            TextBlock.Text = node.Text;
+            this.treeNode = node;
+
+            ToggleButton.Tapped += ToggleButton_Tapped;
+
+            Tapped += TreeItem_Tapped;
+            StackPanel.Tapped += TreeItem_Tapped;
+            TextBlock.Tapped += TreeItem_Tapped;
+
+            DoubleTapped += TreeItem_DoubleTapped;
+            StackPanel.DoubleTapped += TreeItem_DoubleTapped;
+            TextBlock.DoubleTapped += TreeItem_DoubleTapped;
+
+            node.TreeItem = this;
+            updateVisual();
+        }
+        internal void updateVisual()
+        {
+            if (treeNode == null) return;
+            StackPanel.Height = treeControl.FontSize*1.2;
+
+            ToggleButton.Margin = new Thickness(treeNode.Indent * treeControl.FontSize+ treeControl.FontSize * 0.2, treeControl.FontSize*0.2, treeControl.FontSize*0.2, treeControl.FontSize * 0.2);
+
+            Image.Width = treeControl.FontSize;
+            Image.Height = treeControl.FontSize;
+            Image.Source = treeNode.Image;
+            Image.Margin = new Thickness(0, 0, treeControl.FontSize * 0.2,0);
+
+            if (treeNode.Nodes.Count == 0)
+            {
+                ToggleButton.Source = treeControl.dotIcon;
+            }
+            else if (treeNode.IsExpanded)
+            {
+                ToggleButton.Source = treeControl.collaspedIcon;
             }
             else
-            { // ほしいobjectが見つからなかった場合
-                return null;
+            {
+                ToggleButton.Source = treeControl.expandedIcon;
             }
+
+            if (treeNode.Selected)
+            {
+                TextBlock.Foreground = new SolidColorBrush(treeControl.SelectedItemColor);
+            }
+            else
+            {
+                TextBlock.Foreground = treeControl.Foreground;
+            }
+            InvalidateVisual();
         }
 
+        private TreeControl treeControl;
+        private void TreeItem_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        {
+            if (treeNode == null) return;
+            treeControl.nodeTapped(treeNode, e);
+            treeNode.OnClicked();
+        }
+        private void TreeItem_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        {
+            if (treeNode == null) return;
+            treeNode.IsExpanded = !treeNode.IsExpanded;
+        }
+
+        private void ToggleButton_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        {
+            if (treeNode == null) return;
+            if (treeNode.Nodes.Count == 0) return;
+            treeNode.IsExpanded = !treeNode.IsExpanded;
+            updateVisual();
+            e.Handled = true;
+        }
+
+        internal TreeNode treeNode;
+
+
+        public double RowHeight
+        {
+            get { return StackPanel.Height; }
+            set
+            {
+                StackPanel.Height = value;
+                Image.Height = value;
+                Image.Width = value;
+                ToggleButton.Height = value;
+                ToggleButton.Width = value;
+            }
+        }   
+
+        public StackPanel StackPanel = new StackPanel()
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Margin = new Thickness(0, 0, 0, 0),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            MinHeight = 0
+        };
+
+        public Image ToggleButton = new Image()
+        {
+            Margin = new Thickness(0, 0, 0, 0),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            MinHeight = 0
+        };
+
+        public Image Image = new Image()
+        {
+            Margin = new Thickness(0, 0, 0, 0),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+        };
+
+        public TextBlock TextBlock = new TextBlock()
+        {
+            Margin = new Thickness(0, 0, 0, 0),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            MinHeight = 0,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent)
+        };
+
     }
+
+
 }

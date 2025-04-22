@@ -24,8 +24,6 @@
 						   />
 			</DataTemplate>
 		</ListBox.ItemTemplate>
-
-
 	</ListBox>
 	
 </UserControl>
