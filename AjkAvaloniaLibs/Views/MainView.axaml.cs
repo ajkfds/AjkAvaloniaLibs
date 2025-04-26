@@ -47,5 +47,24 @@ public partial class MainView : UserControl
 
         ColorLabel1.Add(label);
 
+        BtnAdd.Tapped += BtnAdd_Tapped;
+        BtnRemove.Tapped += BtnRemove_Tapped;
+        BtnChange.Tapped += BtnChange_Tapped;
+
+    }
+
+    private void BtnChange_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
+    {
+        Tree1.Nodes[0].Text = "aaa";
+    }
+
+    private void BtnRemove_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
+    {
+        Tree1.Nodes[0].Nodes[0].Nodes.RemoveAt(1);
+    }
+
+    private void BtnAdd_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
+    {
+        Tree1.Nodes[0].Nodes[0].Nodes.Add(new TreeNode("new_"));
     }
 }

@@ -2,6 +2,8 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
+using DynamicData;
+using ExCSS;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -101,7 +103,7 @@ namespace AjkAvaloniaLibs.Controls
         private bool _selected = false;
         public bool Selected {
             get { return _selected; } 
-            set {
+            internal set {
                 _selected = value;
                 if(TreeItem != null) TreeItem.updateVisual();
             } 
@@ -113,14 +115,14 @@ namespace AjkAvaloniaLibs.Controls
 
         // 親ノード WeakReferenceで保持する
         internal System.WeakReference<ITreeNodeOwner>? _parent = null;
-        public TreeNode? Parent
+        internal ITreeNodeOwner? parent
         {
             get
             {
                 ITreeNodeOwner? ret;
                 if (_parent == null) return null;
                 if (!_parent.TryGetTarget(out ret)) return null;
-                return ret as TreeNode;
+                return ret;
             }
             set
             {
@@ -134,6 +136,15 @@ namespace AjkAvaloniaLibs.Controls
                 }
             }
         }
+
+        public TreeNode? Parent
+        {
+            get
+            {
+                return parent as TreeNode;
+            }
+        }
+
 
         internal System.WeakReference<TreeControl.TreeItem>? _treeItem = null;
         internal TreeControl.TreeItem? TreeItem
@@ -162,32 +173,55 @@ namespace AjkAvaloniaLibs.Controls
         public Action<object?, System.Collections.Specialized.NotifyCollectionChangedEventArgs>? CollectionChanged { get; set; } = null;
         private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (e.NewItems != null)
-            {
-                foreach (TreeNode node in e.NewItems)
-                {
-                    node.Parent = this;
-                    if (node.Parent == null)
-                    {
-                        node.Indent = 0;
-                    }
-                    else
-                    {
-                        node.Indent = Indent + 1;
-                    }
-                }
-            }
             if (e.OldItems != null)
             {
                 foreach (TreeNode node in e.OldItems)
                 {
-                    node.Parent = null;
+                    node.parent = null;
                     node.Indent = 0;
+                    node.PropageteCollectionChange -= Nodes_CollectionChangeInform;
+                    node.PropertyChanged -= Node_PropertyChanged;
+                }
+            }
+            if (e.NewItems != null)
+            {
+                foreach (TreeNode node in e.NewItems)
+                {
+                    node.parent = this;
+                    node.updateIndent();
+                    node.PropageteCollectionChange += Nodes_CollectionChangeInform;
+                    node.PropertyChanged += Node_PropertyChanged;
                 }
             }
             // raise upper layer
             if (TreeItem != null) TreeItem.updateVisual();
-            if (PropageteCollectionChange != null) PropageteCollectionChange(this, e);
+            if (PropageteCollectionChange != null)
+            {
+                PropageteCollectionChange(this, e);
+            }
+        }
+
+        internal void updateIndent()
+        {
+            if (Parent != null)
+            {
+                Indent = Parent.Indent+1;
+            }
+            else
+            {
+                Indent = 0;
+            }
+
+            foreach (TreeNode node in Nodes)
+            {
+                node.updateIndent();
+            }
+        }
+
+        private void Node_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (Parent == null || Parent.PropertyChanged == null) return;
+            Parent.PropertyChanged(sender, new PropertyChangedEventArgs(e.PropertyName));
         }
 
         public Action<TreeNode, System.Collections.Specialized.NotifyCollectionChangedEventArgs>? PropageteCollectionChange { get; set; } = null;
@@ -195,6 +229,7 @@ namespace AjkAvaloniaLibs.Controls
         {
             if (PropageteCollectionChange != null) PropageteCollectionChange(this, e);
         }
+
 
         // ノード展開時に呼ばれる
         public virtual void OnExpand() { }

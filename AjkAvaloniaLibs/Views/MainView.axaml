@@ -14,7 +14,14 @@
   </Design.DataContext>
 	<TabControl>
 		<TabItem Header="Tree">
-			<controls:TreeControl Name="Tree1"/>
+			<StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<Button Name="BtnAdd">add</Button>
+					<Button Name="BtnRemove">remove</Button>
+					<Button Name="BtnChange">change</Button>
+				</StackPanel>
+				<controls:TreeControl Name="Tree1"/>
+			</StackPanel>
 		</TabItem>
 		<TabItem Header="ListView">
 			<controls:ListViewControl Name="ListView1" />

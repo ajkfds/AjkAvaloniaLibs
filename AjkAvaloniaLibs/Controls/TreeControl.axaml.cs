@@ -5,14 +5,18 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input.TextInput;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Avalonia.Remote.Protocol;
 using Avalonia.Styling;
 using DynamicData;
 using DynamicData.Binding;
 using ExCSS;
 using ReactiveUI;
+using ShimSkiaSharp;
 using Svg;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace AjkAvaloniaLibs.Controls;
@@ -73,6 +77,10 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     internal Avalonia.Media.Imaging.Bitmap expandedIcon;
     internal Avalonia.Media.Imaging.Bitmap collaspedIcon;
     internal Avalonia.Media.Imaging.Bitmap dotIcon;
+
+    [MemberNotNull(nameof(expandedIcon))]
+    [MemberNotNull(nameof(collaspedIcon))]
+    [MemberNotNull(nameof(dotIcon))]
     private void updateVisual()
     {
         expandedIcon = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/minus.svg", ToggleButtonColor);
@@ -90,71 +98,183 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     // call this method from all subnode nodes
     private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        PropageteCollectionChange(this,e);
-    }
-    private void PropageteCollectionChange(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-    {
         if (e.NewItems != null)
         {
             foreach (TreeNode node in e.NewItems)
             {
-                if (node._parent == null)
+                if (node.Nodes.Count > 0)
                 {
-                    node._parent = new WeakReference<ITreeNodeOwner>(this);
+                    System.Diagnostics.Debugger.Break();
                 }
+                node.parent = this;
+                node.Indent = 0;
+                node.updateIndent();
+                node.PropertyChanged += Node_PropertyChanged;
                 node.PropageteCollectionChange += PropageteCollectionChange;
-                node.ReportExpanded += NodeExpanded;
-                node.ReportCollapsed += NodeCollapsed;
-
-                // fix visuals
-                if (node.Parent == null)
-                {
-                    node.Visible = true;
-                }
-                else
-                {
-                    if(node.Parent.Visible & node.Parent.IsExpanded)
-                    {
-                        node.Visible = true;
-                    }
-                    else
-                    {
-                        node.Visible = false;
-                    }
-                }
-
-                if (node.Visible)
-                {
-                    TreeNode? nextTo = node.NextTo;
-                    if (nextTo == null)
-                    {
-                        Items.Insert(0, new TreeItem(node,this));
-                    }
-                    else
-                    {
-                        int index = Items.IndexOf(Items.First(x => x.treeNode == nextTo));
-                        Items.Insert(index + 1, new TreeItem(node,this));
-                    }
-                }
             }
         }
         if (e.OldItems != null)
         {
             foreach (TreeNode node in e.OldItems)
             {
-                node.CollectionChanged -= Nodes_CollectionChanged;
-                node._parent = null;
+                node.parent = null;
+                node.Indent = 0;
+                node.updateIndent();
+                node.PropertyChanged -= Node_PropertyChanged;
                 node.PropageteCollectionChange -= PropageteCollectionChange;
-                node.ReportExpanded -= NodeExpanded;
-                node.ReportCollapsed -= NodeCollapsed;
-
-                // fix visuals
-                if (node.TreeItem != null)
-                {
-                    Items.Remove(node.TreeItem);
-                    node.TreeItem = null;
-                }
             }
+        }
+        PropageteCollectionChange(this,e);
+    }
+
+    private void Node_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not TreeNode treeNode) return;
+        if (treeNode.TreeItem == null) return;
+
+        treeNode.TreeItem.updateVisual();
+    }
+    private void PropageteCollectionChange(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        System.Diagnostics.Debug.Print("PropageteCollectionChange");
+
+        // Update TreeItems
+        switch (e.Action)
+        {
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                if (e.OldItems != null)
+                {
+                    foreach (TreeNode node in e.OldItems)
+                    {
+                        System.Diagnostics.Debug.Print("PropageteCollectionChange remove "+node.Text + ",indent " + node.Indent);
+                        removeNode(node);
+                    }
+                }
+                if (e.NewItems != null)
+                {
+                    foreach (TreeNode node in e.NewItems)
+                    {
+                        addNode(node);
+                        System.Diagnostics.Debug.Print("PropageteCollectionChange add " + node.Text+",indent "+node.Indent);
+                    }
+                }
+                break;
+            case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                if (sender is TreeNode ownerNode)
+                {
+                    System.Diagnostics.Debug.Print("PropageteCollectionChange remove all on "+ownerNode.Text + ",indent " + ownerNode.Indent);
+                    TreeItem? ownerItem = ownerNode.TreeItem;
+                    if(ownerItem != null)
+                    {
+                        removeAllTreeItem(ownerItem);
+                    }
+                }
+                else if(sender is TreeControl)
+                {
+                    System.Diagnostics.Debug.Print("PropageteCollectionChange remove all");
+                    foreach (TreeItem item in Items)
+                    {
+                        TreeNode? node = item.treeNode;
+                        if (node != null)
+                        {
+                            removeNode(node);
+                        }
+                    }
+                    Items.Clear();
+                }
+                break;
+        }
+    }
+
+    private void removeAllTreeItem(TreeItem item)
+    {
+        int index = Items.IndexOf(item) + 1;
+        while (index < Items.Count)
+        {
+            if (Items[index].treeNode.parent == item.treeNode)
+            {
+                removeAllTreeItem(Items[index]);
+            }
+            else
+            {
+                break;
+            }
+        }
+        Items.Remove(item);
+    }
+
+    private void addNode(TreeNode node)
+    {
+        if (node._parent == null)
+        {
+            node._parent = new WeakReference<ITreeNodeOwner>(this);
+        }
+        node.ReportExpanded += NodeExpanded;
+        node.ReportCollapsed += NodeCollapsed;
+
+        // fix visuals
+        if (node.Parent == null)
+        {
+            node.Visible = true;
+        }
+        else
+        {
+            if (node.Parent.Visible & node.Parent.IsExpanded)
+            {
+                node.Visible = true;
+            }
+            else
+            {
+                node.Visible = false;
+            }
+        }
+
+        if (node.Visible)
+        {
+            TreeNode? nextTo = node.NextTo;
+            if (nextTo == null)
+            {
+                Items.Insert(0, new TreeItem(node, this));
+            }
+            else
+            {
+                int index = Items.IndexOf(Items.First(x => x.treeNode == nextTo));
+                Items.Insert(index + 1, new TreeItem(node, this));
+            }
+        }
+
+        foreach(TreeNode subNode in node.Nodes)
+        {
+            addNode(subNode);
+        }
+    }
+
+    private void removeNode(TreeNode node)
+    {
+        if(selectedNode == node)
+        {
+            selectedNode = null;
+        }
+
+        foreach (TreeNode subNode in node.Nodes)
+        {
+            removeNode(subNode);
+        }
+
+        node.CollectionChanged -= Nodes_CollectionChanged;
+        node._parent = null;
+        node.PropageteCollectionChange -= PropageteCollectionChange;
+        node.ReportExpanded -= NodeExpanded;
+        node.ReportCollapsed -= NodeCollapsed;
+
+        // fix visuals
+        if (node.TreeItem != null)
+        {
+            Items.Remove(node.TreeItem);
+            node.TreeItem = null;
         }
     }
 
@@ -289,6 +409,16 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                     prevSelected = false;
                 }
             }
+
+            if(TextBlock.Text != treeNode.Text)
+            {
+                TextBlock.Text = treeNode.Text;
+            }
+
+            if (Image.Source != treeNode.Image)
+            {
+                Image.Source = treeNode.Image;
+            }
         }
 
         private TreeControl treeControl;
@@ -356,8 +486,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
             MinHeight = 0,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-//            Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent)
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch
         };
 
     }
