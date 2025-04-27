@@ -7,6 +7,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Remote.Protocol;
 using Avalonia.Styling;
+using Avalonia.VisualTree;
 using DynamicData;
 using DynamicData.Binding;
 using ExCSS;
@@ -32,8 +33,14 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         InitializeComponent();
         DataContext = this;
         ListBox0.ItemsSource = this.Items;
+        ListBox0.Background = Background;
         updateVisual();
         Nodes.CollectionChanged += Nodes_CollectionChanged;
+
+        // Workaround for the issue where the bottom item may be hidden under the horizontal scrollbar
+        // and becomes unclickable when scrolled to the lower limit.
+        // Extends the scrollable range to allow further scrolling below the limit.
+        Items.Add( new TreeItem(this) ); // add blank
 
         this.AddHandler(PointerWheelChangedEvent, (o, i) =>
         {
@@ -68,7 +75,9 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
             node3.Nodes.Add(node3_1);
         }
+
     }
+
 
     public Avalonia.Media.Color ToggleButtonColor { get; set; }
     public Avalonia.Media.Color SelectedForegroundColor { get; set; }
@@ -136,8 +145,6 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     }
     private void PropageteCollectionChange(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        System.Diagnostics.Debug.Print("PropageteCollectionChange");
-
         // Update TreeItems
         switch (e.Action)
         {
@@ -149,7 +156,6 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 {
                     foreach (TreeNode node in e.OldItems)
                     {
-                        System.Diagnostics.Debug.Print("PropageteCollectionChange remove "+node.Text + ",indent " + node.Indent);
                         removeNode(node);
                     }
                 }
@@ -158,14 +164,12 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                     foreach (TreeNode node in e.NewItems)
                     {
                         addNode(node);
-                        System.Diagnostics.Debug.Print("PropageteCollectionChange add " + node.Text+",indent "+node.Indent);
                     }
                 }
                 break;
             case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
                 if (sender is TreeNode ownerNode)
                 {
-                    System.Diagnostics.Debug.Print("PropageteCollectionChange remove all on "+ownerNode.Text + ",indent " + ownerNode.Indent);
                     TreeItem? ownerItem = ownerNode.TreeItem;
                     if(ownerItem != null)
                     {
@@ -174,7 +178,6 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 }
                 else if(sender is TreeControl)
                 {
-                    System.Diagnostics.Debug.Print("PropageteCollectionChange remove all");
                     foreach (TreeItem item in Items)
                     {
                         TreeNode? node = item.treeNode;
@@ -194,7 +197,8 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         int index = Items.IndexOf(item) + 1;
         while (index < Items.Count)
         {
-            if (Items[index].treeNode.parent == item.treeNode)
+            TreeNode? treeNode = Items[index].treeNode;
+            if (treeNode != null && treeNode.parent == item.treeNode)
             {
                 removeAllTreeItem(Items[index]);
             }
@@ -359,6 +363,21 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             updateVisual();
         }
 
+        public TreeItem(TreeControl treeControl)
+        {
+            this.treeControl = treeControl;
+            Content = StackPanel;
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent);
+
+            StackPanel.Children.Add(ToggleButton);
+            StackPanel.Children.Add(Image);
+            StackPanel.Children.Add(TextBlock);
+
+            StackPanel.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
+        }
+
+
         double? prevFontSize = null;
         bool? prevSelected = null;
         internal void updateVisual()
@@ -410,7 +429,9 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 }
             }
 
-            if(TextBlock.Text != treeNode.Text)
+            StackPanel.Background = treeControl.Background;
+
+            if (TextBlock.Text != treeNode.Text)
             {
                 TextBlock.Text = treeNode.Text;
             }
@@ -443,7 +464,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             e.Handled = true;
         }
 
-        internal TreeNode treeNode;
+        internal TreeNode? treeNode;
 
 
         public double RowHeight
