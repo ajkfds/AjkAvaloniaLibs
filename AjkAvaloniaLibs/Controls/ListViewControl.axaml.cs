@@ -54,6 +54,8 @@ namespace AjkAvaloniaLibs.Controls
 
         public void Scroll(ListViewItem item)
         {
+            if (!ListBox0.Items.Contains(item)) return;
+
             ListBox0.ScrollIntoView(item);
         }
 
