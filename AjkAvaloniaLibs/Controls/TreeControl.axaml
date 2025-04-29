@@ -4,7 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:ctrl="clr-namespace:AjkAvaloniaLibs.Controls;assembly=AjkAvaloniaLibs"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
-             x:Class="AjkAvaloniaLibs.Controls.TreeControl">
+             x:Class="AjkAvaloniaLibs.Controls.TreeControl"
+			 x:DataType="ctrl:TreeControl"
+             x:CompileBindings="True"
+			 >
 	<ListBox Name="ListBox0" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
 
 </UserControl>
