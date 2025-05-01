@@ -64,7 +64,7 @@ namespace AjkAvaloniaLibs.Controls
         }
 
         private IImage? bitmap = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/paper.svg");
-        public virtual IImage? Image
+        public  IImage? Image
         {
             get
             {
@@ -248,7 +248,7 @@ namespace AjkAvaloniaLibs.Controls
 
         // ノードテキスト
         private string _Text = "";
-        public virtual string Text
+        public string Text
         {
             get { return _Text; }
             set { _Text = value; NotifyPropertyChanged(); }
