@@ -78,8 +78,17 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
     }
 
-
-    public Avalonia.Media.Color ToggleButtonColor { get; set; }
+    Avalonia.Media.Color toggleButtonColor;
+    public Avalonia.Media.Color ToggleButtonColor {
+        get {
+            return toggleButtonColor; 
+        } 
+        set { 
+            if(toggleButtonColor == value) return;
+            toggleButtonColor = value;
+            updateVisual();
+        } 
+    }
     public Avalonia.Media.Color SelectedForegroundColor { get; set; }
     public Avalonia.Media.Color SelectedBackgroundColor { get; set; }
 
@@ -90,6 +99,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     [MemberNotNull(nameof(expandedIcon))]
     [MemberNotNull(nameof(collaspedIcon))]
     [MemberNotNull(nameof(dotIcon))]
+
     private void updateVisual()
     {
         expandedIcon = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/minus.svg", ToggleButtonColor);

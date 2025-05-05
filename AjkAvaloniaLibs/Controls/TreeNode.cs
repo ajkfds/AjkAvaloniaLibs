@@ -32,20 +32,23 @@ namespace AjkAvaloniaLibs.Controls
         public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
         internal TreeNode? NextTo {
             get {
-                ObservableCollection<TreeNode>? ownerNodes;
-                TreeNode? owner = null;
-                ITreeNodeOwner? ret;
+                // get owner
+                ITreeNodeOwner? owner;
                 if (_parent == null) return null;
-                if (!_parent.TryGetTarget(out ret)) return null;
+                if (!_parent.TryGetTarget(out owner)) return null;
 
-                if (ret is TreeNode)
+                // get owenerNodes,ownerTreeNode
+                ObservableCollection<TreeNode>? ownerNodes;
+
+                TreeNode? ownerTreeNode = null;
+                if (owner is TreeNode)
                 {
-                    ownerNodes = ((TreeNode)ret).Nodes;
-                    owner = (TreeNode)ret;
+                    ownerNodes = ((TreeNode)owner).Nodes;
+                    ownerTreeNode = (TreeNode)owner;
                 }
-                else if (ret is TreeControl)
+                else if (owner is TreeControl)
                 {
-                    ownerNodes = ((TreeControl)ret).Nodes;
+                    ownerNodes = ((TreeControl)owner).Nodes;
                 }
                 else
                 {
@@ -53,13 +56,20 @@ namespace AjkAvaloniaLibs.Controls
                 }
 
                 int index = ownerNodes.IndexOf(this);
-                if(index < 0) return null;
-                if (index == 0)
+                if (index < 0) return null;
+
+                if (index == 0) // top item of owner nodes
                 {
-                    if (owner == null) return null;
-                    else return owner;
+                    if (ownerTreeNode == null) return null;
+                    else return ownerTreeNode;
                 }
-                return ownerNodes[index - 1];
+
+                TreeNode previousNode = ownerNodes[index - 1];
+                while (previousNode.IsExpanded)
+                {
+                    previousNode = previousNode.Nodes.Last<TreeNode>();
+                }
+                return previousNode;
             }
         }
 
