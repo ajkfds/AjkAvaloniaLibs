@@ -2,6 +2,7 @@ using AjkAvaloniaLibs.Controls;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Input.TextInput;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
@@ -51,6 +52,8 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             updateVisual();
         }, Avalonia.Interactivity.RoutingStrategies.Bubble, true);
 
+        this.KeyDown += TreeControl_KeyDown;
+
         if (Design.IsDesignMode)
         {
             TreeNode node1 = new TreeNode("TestNode1");
@@ -76,6 +79,67 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             node3.Nodes.Add(node3_1);
         }
 
+    }
+
+    private void TreeControl_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
+    {
+        if (selectedNode == null) return;
+        TreeItem? treeItem = selectedNode.TreeItem;
+        if (treeItem == null) return;
+
+        if (e.Key == Avalonia.Input.Key.Up)
+        {
+            int index = Items.IndexOf(treeItem);
+            index--;
+            if (index < 0) return;
+            TreeItem? item = Items[index];
+            if (item == null) return;
+            TreeNode? node = item.treeNode;
+            if (node == null) return;
+            nodeSlected(node);
+        }
+        else if (e.Key == Avalonia.Input.Key.Down)
+        {
+            int index = Items.IndexOf(treeItem);
+            index++;
+            if (index >= Items.Count) return;
+            TreeItem? item = Items[index];
+            if (item == null) return;
+            TreeNode? node = item.treeNode;
+            if (node == null) return;
+            nodeSlected(node);
+        }
+        else if (e.Key == Avalonia.Input.Key.Left)
+        {
+            if (selectedNode.IsExpanded)
+            {
+                selectedNode.IsExpanded = false;
+                treeItem.updateVisual();
+            }
+            else
+            {
+                TreeNode? parent = selectedNode.Parent;
+                if (parent != null)
+                {
+                    nodeSlected(parent);
+                }
+            }
+        }else if(e.Key == Avalonia.Input.Key.Right)
+        {
+            if(selectedNode.IsExpanded)
+            {
+                selectedNode.IsExpanded = false;
+                treeItem.updateVisual();
+            }
+            else
+            {
+                if (selectedNode.Nodes.Count > 0)
+                {
+                    selectedNode.IsExpanded = true;
+                    treeItem.updateVisual();
+                }
+            }
+        }
     }
 
     Avalonia.Media.Color toggleButtonColor;
@@ -292,7 +356,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
     }
 
-    internal void nodeTapped(TreeNode node, Avalonia.Input.TappedEventArgs e)
+    private void nodeSlected(TreeNode node)
     {
         if (selectedNode != null) selectedNode.Selected = false; 
         selectedNode = node;
@@ -359,11 +423,13 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             TextBlock.Text = node.Text;
             this.treeNode = node;
 
+            this.KeyDown += TreeNode_KeyDown;
             ToggleButton.Tapped += ToggleButton_Tapped;
+            ToggleButton.PointerPressed += ToggleButton_PointerPressed;
 
-            Tapped += TreeItem_Tapped;
-            StackPanel.Tapped += TreeItem_Tapped;
-            TextBlock.Tapped += TreeItem_Tapped;
+            PointerPressed += TreeItem_PointerPressed;
+            StackPanel.PointerPressed += TreeItem_PointerPressed;
+            TextBlock.PointerPressed += TreeItem_PointerPressed;
 
             DoubleTapped += TreeItem_DoubleTapped;
             StackPanel.DoubleTapped += TreeItem_DoubleTapped;
@@ -372,6 +438,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             node.TreeItem = this;
             updateVisual();
         }
+
 
         public TreeItem(TreeControl treeControl)
         {
@@ -453,10 +520,21 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
 
         private TreeControl treeControl;
-        private void TreeItem_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        private void TreeNode_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
         {
             if (treeNode == null) return;
-            treeControl.nodeTapped(treeNode, e); // select node
+            treeControl.TreeControl_KeyDown(sender, e);
+        }
+        private void ToggleButton_PointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            if (treeNode == null) return;
+            treeControl.nodeSlected(treeNode); // select node
+            treeNode.OnClicked();
+        }
+        private void TreeItem_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        {
+            if (treeNode == null) return;
+            treeControl.nodeSlected(treeNode); // select node
             treeNode.OnClicked();
         }
         private void TreeItem_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
