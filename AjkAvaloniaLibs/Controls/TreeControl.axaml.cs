@@ -415,6 +415,8 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
             Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent);
 
+            RenderOptions.SetBitmapInterpolationMode(Image, Avalonia.Media.Imaging.BitmapInterpolationMode.HighQuality);
+
             StackPanel.Children.Add(ToggleButton);
             StackPanel.Children.Add(Image);
             StackPanel.Children.Add(TextBlock);
