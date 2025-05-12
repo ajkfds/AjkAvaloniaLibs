@@ -156,15 +156,15 @@ namespace AjkAvaloniaLibs.Controls
         }
 
 
-        internal System.WeakReference<TreeControl.TreeItem>? _treeItem = null;
-        internal TreeControl.TreeItem? TreeItem
+        internal System.WeakReference<TreeControl.TreeViewItem>? _treeItem = null;
+        internal TreeControl.TreeViewItem? TreeItem
         {
             get
             {
-                TreeControl.TreeItem? ret;
+                TreeControl.TreeViewItem? ret;
                 if (_treeItem == null) return null;
                 if (!_treeItem.TryGetTarget(out ret)) return null;
-                return ret as TreeControl.TreeItem;
+                return ret as TreeControl.TreeViewItem;
             }
             set
             {
@@ -174,7 +174,7 @@ namespace AjkAvaloniaLibs.Controls
                 }
                 else
                 {
-                    _treeItem = new WeakReference<TreeControl.TreeItem>(value);
+                    _treeItem = new WeakReference<TreeControl.TreeViewItem>(value);
                 }
             }
         }

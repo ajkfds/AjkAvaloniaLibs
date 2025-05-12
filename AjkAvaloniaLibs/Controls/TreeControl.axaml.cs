@@ -41,7 +41,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         // Workaround for the issue where the bottom item may be hidden under the horizontal scrollbar
         // and becomes unclickable when scrolled to the lower limit.
         // Extends the scrollable range to allow further scrolling below the limit.
-        Items.Add( new TreeItem(this) ); // add blank
+        Items.Add( new TreeViewItem(this) ); // add blank
 
         this.AddHandler(PointerWheelChangedEvent, (o, i) =>
         {
@@ -84,7 +84,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     private void TreeControl_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
     {
         if (selectedNode == null) return;
-        TreeItem? treeItem = selectedNode.TreeItem;
+        TreeViewItem? treeItem = selectedNode.TreeItem;
         if (treeItem == null) return;
 
         if (e.Key == Avalonia.Input.Key.Up)
@@ -92,7 +92,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             int index = Items.IndexOf(treeItem);
             index--;
             if (index < 0) return;
-            TreeItem? item = Items[index];
+            TreeViewItem? item = Items[index];
             if (item == null) return;
             TreeNode? node = item.treeNode;
             if (node == null) return;
@@ -103,7 +103,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             int index = Items.IndexOf(treeItem);
             index++;
             if (index >= Items.Count) return;
-            TreeItem? item = Items[index];
+            TreeViewItem? item = Items[index];
             if (item == null) return;
             TreeNode? node = item.treeNode;
             if (node == null) return;
@@ -170,13 +170,13 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         collaspedIcon = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/plus.svg", ToggleButtonColor);
         dotIcon = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/dot.svg", ToggleButtonColor);
 
-        foreach (TreeItem item in Items)
+        foreach (TreeViewItem item in Items)
         {
             item.updateVisual();
         }
     }
     public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
-    public ObservableCollection<TreeItem> Items { get; set; } = new ObservableCollection<TreeItem>();
+    public ObservableCollection<TreeViewItem> Items { get; set; } = new ObservableCollection<TreeViewItem>();
 
     // call this method from all subnode nodes
     private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -244,7 +244,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
                 if (sender is TreeNode ownerNode)
                 {
-                    TreeItem? ownerItem = ownerNode.TreeItem;
+                    TreeViewItem? ownerItem = ownerNode.TreeItem;
                     if(ownerItem != null)
                     {
                         removeAllTreeItem(ownerItem);
@@ -252,7 +252,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 }
                 else if(sender is TreeControl)
                 {
-                    foreach (TreeItem item in Items)
+                    foreach (TreeViewItem item in Items)
                     {
                         TreeNode? node = item.treeNode;
                         if (node != null)
@@ -266,7 +266,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
     }
 
-    private void removeAllTreeItem(TreeItem item)
+    private void removeAllTreeItem(TreeViewItem item)
     {
         int index = Items.IndexOf(item) + 1;
         while (index < Items.Count)
@@ -315,12 +315,12 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             TreeNode? nextTo = node.NextTo;
             if (nextTo == null)
             {
-                Items.Insert(0, new TreeItem(node, this));
+                Items.Insert(0, new TreeViewItem(node, this));
             }
             else
             {
                 int index = Items.IndexOf(Items.First(x => x.treeNode == nextTo));
-                Items.Insert(index + 1, new TreeItem(node, this));
+                Items.Insert(index + 1, new TreeViewItem(node, this));
             }
         }
 
@@ -371,14 +371,14 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     }
     private void NodeExpanded(TreeNode node)
     {
-        TreeItem? rootItem = node.TreeItem;
+        TreeViewItem? rootItem = node.TreeItem;
         if (rootItem == null) throw new Exception("TreeItem is null");
 
         int index = Items.IndexOf(rootItem) + 1;
         foreach (TreeNode subnode in node.Nodes)
         {
             subnode.Visible = true;
-            TreeItem item = new TreeItem(subnode,this);
+            TreeViewItem item = new TreeViewItem(subnode,this);
             Items.Insert(index, item);
             index++;
         }
@@ -406,9 +406,9 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
     }
 
-    public class TreeItem : ListBoxItem
+    public class TreeViewItem : ListBoxItem
     {
-        public TreeItem(TreeNode node,TreeControl treeControl)
+        public TreeViewItem(TreeNode node,TreeControl treeControl)
         {
             this.treeControl = treeControl;
             Content = StackPanel;
@@ -440,7 +440,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
 
 
-        public TreeItem(TreeControl treeControl)
+        public TreeViewItem(TreeControl treeControl)
         {
             this.treeControl = treeControl;
             Content = StackPanel;
