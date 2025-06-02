@@ -178,7 +178,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
     public ObservableCollection<TreeViewItem> Items { get; set; } = new ObservableCollection<TreeViewItem>();
 
-    // call this method from all subnode nodes
+    // call this method from all subnodes
     private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         if (e.NewItems != null)
@@ -356,6 +356,11 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
     }
 
+    public void SelectNode(TreeNode node)
+    {
+        nodeSlected(node);
+    }
+
     private void nodeSlected(TreeNode node)
     {
         if (selectedNode != null) selectedNode.Selected = false; 
@@ -406,8 +411,12 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
     }
 
+    // TreeView items are used to display the nodes in the ListBox
+    // automatically created by the TreeNode class
+    // only visible nodes are created to reduce ui update time
     public class TreeViewItem : ListBoxItem
     {
+        // create item collesponding to a TreeNode
         public TreeViewItem(TreeNode node,TreeControl treeControl)
         {
             this.treeControl = treeControl;
@@ -441,7 +450,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             updateVisual();
         }
 
-
+        // create blank item to add to the end of the list
         public TreeViewItem(TreeControl treeControl)
         {
             this.treeControl = treeControl;
@@ -531,13 +540,13 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         {
             if (treeNode == null) return;
             treeControl.nodeSlected(treeNode); // select node
-            treeNode.OnClicked();
+//            treeNode.OnClicked();
         }
         private void TreeItem_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
         {
             if (treeNode == null) return;
             treeControl.nodeSlected(treeNode); // select node
-            treeNode.OnClicked();
+//            treeNode.OnClicked();
         }
         private void TreeItem_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
