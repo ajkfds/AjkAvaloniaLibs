@@ -1,4 +1,10 @@
-﻿using HarfBuzzSharp;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using ExCSS;
+using HarfBuzzSharp;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -71,6 +77,16 @@ namespace AjkAvaloniaLibs.Controls
             //        );
             //}
         }
+
+        public class labelImage : labelItem
+        {
+            public labelImage(IImage image)
+            {
+                   this.Image = image;
+            }
+            public IImage Image;
+            public bool IconSize = false;
+        }
         //public class labelIconImage : labelItem
         //{
         //    public labelIconImage(Primitive.IconImage iconImage, Primitive.IconImage.ColorStyle colorStyle)
@@ -78,7 +94,6 @@ namespace AjkAvaloniaLibs.Controls
         //        this.IconImage = iconImage;
         //        this.ColorStyle = colorStyle;
         //    }
-        //    public Primitive.IconImage IconImage;
         //    public Primitive.IconImage.ColorStyle ColorStyle;
 
         //    public Size GetSize(int height)
@@ -136,45 +151,27 @@ namespace AjkAvaloniaLibs.Controls
         public void AppendText(string text)
         {
             string linesStr = text.Replace("\r\n", "\n");
-            items.Add(new labelText(text));
-
-            //if (linesStr == "\n")
-            //{
-            //    items.Add(new labelNewLine());
-            //    return;
-            //}
-            //string[] lines = linesStr.Split('\n');
-            //foreach (string line in lines)
-            //{
-            //    items.Add(new labelText(line));
-            //    items.Add(new labelNewLine());
-            //}
-            //if (!text.EndsWith("\n") && lines.Length != 0) items.Remove(items.Last());
+            items.Add(new labelText(linesStr));
         }
 
         public void AppendText(string text, Avalonia.Media.Color color)
         {
             string linesStr = text.Replace("\r\n", "\n");
-            items.Add(new labelText(text,color));
-            //if (linesStr == "\n")
-            //{
-            //    items.Add(new labelNewLine());
-            //    return;
-            //}
-            //string[] lines = linesStr.Split('\n');
-            //foreach (string line in lines)
-            //{
-            //    items.Add(new labelText(line, color));
-            //    items.Add(new labelNewLine());
-            //}
-            //if (!text.EndsWith("\n") && lines.Length != 0) items.Remove(items.Last());
+            items.Add(new labelText(linesStr, color));
         }
 
-        //public void AppendIconImage(Primitive.IconImage iconImage, Primitive.IconImage.ColorStyle colorStyle)
-        //{
-        //    items.Add(new labelIconImage(iconImage, colorStyle));
-        //}
+        public void AppendImage(IImage image)
+        {
+            items.Add(new labelImage(image));
+        }
 
+        public void AppendIconImage(IImage image)
+        {
+            labelImage labelImage = new labelImage(image);
+            labelImage.IconSize = true;
+            items.Add(labelImage);
+        }
+        
         //public void Draw(Graphics graphics, int x, int y, Font font, Color defaultColor, Color backgroundColor)
         //{
         //    Size size;
@@ -188,57 +185,72 @@ namespace AjkAvaloniaLibs.Controls
         //    return size;
         //}
 
-        //private void drawLabels(Graphics graphics, int x, int y, Font font, Color defaultColor, Color backgroundColor, out Size size, bool draw)
-        //{
-        //    int dx = x;
-        //    int dy = y;
-        //    int xSize = 0;
-        //    int ySize = 0;
-        //    Size tSize;
-        //    int lineHeight = System.Windows.Forms.TextRenderer.MeasureText(graphics, "AA", font).Height;
+        public void RemoveLastNewLine()
+        {
+            if (items.Count < 1) return;
+            if (items.Last() is labelNewLine)
+            {
+                items.RemoveAt(items.Count - 1);
+            } else if(items.Last() is labelText)
+            {
+                labelText labelText = (labelText)items.Last();
+                if (!labelText.Text.EndsWith("\n")) return;
+                labelText.Text = labelText.Text.Substring(0, labelText.Text.Length - 1);
+                if(labelText.Text.Length==0) items.RemoveAt(items.Count - 1);
+            }
+        }
 
-        //    for (int i = 0; i < items.Count; i++)
-        //    {
-        //        if (items[i] is labelNewLine)
-        //        {
-        //            dy += lineHeight;
-        //            dx = x;
-        //        }
-        //        else if (items[i] is labelText)
-        //        {
-        //            labelText textItem = items[i] as labelText;
-        //            if (draw) textItem.Draw(graphics, dx, dy, font, defaultColor, backgroundColor);
-        //            tSize = textItem.GetSize(graphics, font);
-        //            dx += tSize.Width;
-        //        }
-        //        else if (items[i] is labelIconImage)
-        //        {
-        //            labelIconImage labelImage = items[i] as labelIconImage;
-        //            if (draw) labelImage.Draw(graphics, dx, dy, lineHeight);
-        //            tSize = labelImage.GetSize(lineHeight);
-        //            dx += tSize.Width;
-        //        }
-        //        else
-        //        {
-        //            System.Diagnostics.Debugger.Break();
-        //        }
-        //        if (dx > xSize) xSize = dx;
-        //        if (dy > ySize) ySize = dy;
-        //    }
-        //    if (items.Count != 0)
-        //    {
-        //        if (items[items.Count - 1] is labelNewLine)
-        //        {
+        public void AppendToTextBlock(TextBlock textBlock)
+        {
+            if (textBlock.Inlines == null) return;
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i] is labelNewLine)
+                {
+                    textBlock.Inlines.Add(new Run("\n"));
+                }
+                else if (items[i] is labelText)
+                {
+                    labelText textItem = (labelText)items[i];
+                    Run run = new Run(textItem.Text);
+                    if (textItem.Color != null) {
+                        run.Foreground = new Avalonia.Media.SolidColorBrush((Avalonia.Media.Color)textItem.Color);
+                    }
+                    textBlock.Inlines.Add(run);
+                }
+                else if (items[i] is labelImage)
+                {
+                    labelImage labelImage = (labelImage)items[i];
 
-        //        }
-        //        else
-        //        {
-        //            ySize += lineHeight;
-        //        }
-        //    }
+                    Avalonia.Controls.Image image = new Avalonia.Controls.Image();
+                    image.Source = labelImage.Image;// new Bitmap(AssetLoader.Open(new Uri("avares://TestApp/Assets/avalonia-logo.ico")));
+                    if (labelImage.IconSize)
+                    {
+                        image.Width = textBlock.FontSize;
+                        image.Height = textBlock.FontSize;
+                        image.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+                    }
+                    else
+                    {
+                        image.Width = labelImage.Image.Size.Width;
+                        image.Height = labelImage.Image.Size.Height;
+                        image.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+                    }
 
-        //    size = new Size(xSize, ySize);
-        //}
+
+                    InlineUIContainer inlineUIContainer = new InlineUIContainer();
+                    inlineUIContainer.BaselineAlignment = BaselineAlignment.Baseline;
+                    inlineUIContainer.Child = image;
+
+                    textBlock.Inlines.Add(inlineUIContainer);
+                }
+                else
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+            }
+
+        }
 
         public string CreateString()
         {
@@ -251,12 +263,12 @@ namespace AjkAvaloniaLibs.Controls
                 }
                 else if (items[i] is labelText)
                 {
-                    labelText textItem = items[i] as labelText;
+                    labelText textItem = (labelText)items[i];
                     sb.Append(textItem.Text);
                 }
-                //else if (items[i] is labelIconImage)
-                //{
-                //}
+                else if (items[i] is labelImage)
+                {
+                }
                 else
                 {
                     System.Diagnostics.Debugger.Break();
