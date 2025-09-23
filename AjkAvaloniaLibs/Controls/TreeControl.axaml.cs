@@ -16,6 +16,7 @@ using ReactiveUI;
 using ShimSkiaSharp;
 using Svg;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -349,11 +350,26 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         node.ReportCollapsed -= NodeCollapsed;
 
         // fix visuals
-        if (node.TreeItem != null)
+        List<TreeViewItem> removeItems = new List<TreeViewItem>();
+        foreach(TreeViewItem? item in Items)
         {
-            Items.Remove(node.TreeItem);
-            node.TreeItem = null;
+            if(item.treeNode == node)
+            {
+                removeItems.Add(item);
+            }
         }
+
+        foreach(TreeViewItem removeItem in removeItems)
+        {
+            Items.Remove(removeItem);
+        }
+        node.TreeItem = null;
+
+        //if (node.TreeItem != null)
+        //{
+        //    Items.Remove(node.TreeItem);
+        //    node.TreeItem = null;
+        //}
     }
 
     public void SelectNode(TreeNode node)
@@ -440,7 +456,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
             PointerPressed += TreeItem_PointerPressed;
             StackPanel.PointerPressed += TreeItem_PointerPressed;
-            TextBlock.PointerPressed += TreeItem_PointerPressed;
+//            TextBlock.PointerPressed += TreeItem_PointerPressed;
 
             DoubleTapped += TreeItem_DoubleTapped;
             StackPanel.DoubleTapped += TreeItem_DoubleTapped;
