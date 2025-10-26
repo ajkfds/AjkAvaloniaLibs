@@ -379,7 +379,12 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
     private void nodeSlected(TreeNode node)
     {
-        if (selectedNode != null) selectedNode.Selected = false; 
+        if (selectedNode == node) return;
+        if (selectedNode != null)
+        {
+            selectedNode.Selected = false;
+            selectedNode.OnDeSelected();
+        }
         selectedNode = node;
         selectedNode.Selected = true;
         selectedNode.OnSelected();

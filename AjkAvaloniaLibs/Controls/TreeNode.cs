@@ -250,6 +250,9 @@ namespace AjkAvaloniaLibs.Controls
         // ノードが選択されたときに呼ばれる
         public virtual void OnSelected() { }
 
+
+        public virtual void OnDeSelected() { }
+
         // ノードがクリックされたときに呼ばれる
         public virtual void OnClicked() { }
 
