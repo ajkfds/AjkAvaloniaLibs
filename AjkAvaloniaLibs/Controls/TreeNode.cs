@@ -183,6 +183,7 @@ namespace AjkAvaloniaLibs.Controls
         public Action<object?, System.Collections.Specialized.NotifyCollectionChangedEventArgs>? CollectionChanged { get; set; } = null;
         private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            if (!Dispatcher.UIThread.CheckAccess()) throw new Exception();
             if (e.OldItems != null)
             {
                 foreach (TreeNode node in e.OldItems)
