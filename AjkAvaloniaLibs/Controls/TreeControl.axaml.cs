@@ -192,9 +192,9 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 }
                 node.parent = this;
                 node.Indent = 0;
-                node.updateIndent();
                 node.PropertyChanged += Node_PropertyChanged;
                 node.PropageteCollectionChange += PropageteCollectionChange;
+                node.updateIndent();
             }
         }
         if (e.OldItems != null)
@@ -404,6 +404,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         foreach (TreeNode subnode in node.Nodes)
         {
             subnode.Visible = true;
+            subnode.Indent = node.Indent + 1;
             TreeViewItem item = new TreeViewItem(subnode,this);
             Items.Insert(index, item);
             index++;
