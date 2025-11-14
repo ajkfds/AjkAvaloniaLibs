@@ -320,8 +320,16 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             }
             else
             {
-                int index = Items.IndexOf(Items.First(x => x.treeNode == nextTo));
-                Items.Insert(index + 1, new TreeViewItem(node, this));
+                TreeViewItem? nextToNode = Items.FirstOrDefault(x => x.treeNode == nextTo);
+                if (nextToNode == null)
+                {
+                    Items.Insert(0, new TreeViewItem(node, this));
+                }
+                else
+                {
+                    int index = Items.IndexOf(nextToNode);
+                    Items.Insert(index + 1, new TreeViewItem(node, this));
+                }
             }
         }
 
