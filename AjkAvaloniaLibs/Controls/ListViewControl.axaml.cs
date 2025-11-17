@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Styling;
@@ -22,12 +23,18 @@ namespace AjkAvaloniaLibs.Controls
                 Items.Add(new ListViewItem("item2", Avalonia.Media.Colors.Green));
             }
 
-            Style style = new Style();
-            style.Selector = ((Selector?)null).OfType(typeof(ListBoxItem));
-//            style.Add(new Setter(Layoutable.MarginProperty, 1.0));
-            style.Add(new Setter(Layoutable.MinHeightProperty, 12.0));
-            style.Add(new Setter(Layoutable.HeightProperty, 18.0));
-            ListBox0.Styles.Add(style);
+            {
+                Style style = new Style();
+                style.Selector = ((Selector?)null).OfType(typeof(ListBoxItem));
+                style.Add(new Setter(Layoutable.MinHeightProperty, 1.0));
+
+                style.Add(new Setter(ListBoxItem.PaddingProperty, new Thickness(2,0,2,0)));
+                style.Add(new Setter(Layoutable.MarginProperty, new Thickness(0)));
+
+                //style.Add(new Setter(Layoutable.HeightProperty, 18.0));
+                ListBox0.Styles.Add(style);
+            }
+
             /* equivalent to this axaml
             
 		    <ListBox.Styles>
@@ -37,9 +44,27 @@ namespace AjkAvaloniaLibs.Controls
 			    </Style>
 		    </ListBox.Styles>             
             */
+            /*
+		    <ListBox.ItemTemplate>
+			    <DataTemplate
+                    x:DataType="ctrl:ListViewItem"
+				    >
+				    <TextBlock Text="{Binding Text}"
+						       Foreground="{Binding ForeColorBrush}"
+						       Background="{Binding BackColorBrush}"
+						       Height="8"
+						       FontSize="8"
+						       Margin="0 0 0 0"
+						       Padding="0"
+						       />
+			    </DataTemplate>
+		    </ListBox.ItemTemplate>
+             */
         }
         public ObservableCollection<ListViewItem> Items = new ObservableCollection<ListViewItem>();
 
+//        public double FontSize { set; get; } = 8;
+//        public double MinHeight { set; get; } = 8;
         public new double MaxHeight
         {
             set

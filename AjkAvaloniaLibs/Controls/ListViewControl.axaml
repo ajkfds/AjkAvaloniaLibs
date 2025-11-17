@@ -17,13 +17,12 @@
 				<TextBlock Text="{Binding Text}"
 						   Foreground="{Binding ForeColorBrush}"
 						   Background="{Binding BackColorBrush}"
-						   Height="8"
-						   FontSize="8"
 						   Margin="0 0 0 0"
 						   Padding="0"
 						   />
 			</DataTemplate>
 		</ListBox.ItemTemplate>
 	</ListBox>
-	
+
+
 </UserControl>
