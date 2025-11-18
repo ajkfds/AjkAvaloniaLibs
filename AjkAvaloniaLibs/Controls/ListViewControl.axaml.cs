@@ -13,14 +13,19 @@ namespace AjkAvaloniaLibs.Controls
         {
             InitializeComponent();
 
-            ListBox0.DataContext = this;
+            DataContext = this;
             ListBox0.ItemsSource = this.Items;
+            ListBox0.Background = Background;
 
             if (Design.IsDesignMode)
             {
                 Items.Add(new ListViewItem("item0", Avalonia.Media.Colors.Red));
                 Items.Add(new ListViewItem("item1", Avalonia.Media.Colors.Blue));
                 Items.Add(new ListViewItem("item2", Avalonia.Media.Colors.Green));
+                for(int i = 3; i < 100; i++)
+                {
+                    Items.Add(new ListViewItem("item"+i.ToString(), Avalonia.Media.Colors.Gray));
+                }
             }
 
             {
@@ -28,38 +33,12 @@ namespace AjkAvaloniaLibs.Controls
                 style.Selector = ((Selector?)null).OfType(typeof(ListBoxItem));
                 style.Add(new Setter(Layoutable.MinHeightProperty, 1.0));
 
-                style.Add(new Setter(ListBoxItem.PaddingProperty, new Thickness(2,0,2,0)));
+                style.Add(new Setter(ListBoxItem.PaddingProperty, new Thickness(2, 0, 2, 0)));
                 style.Add(new Setter(Layoutable.MarginProperty, new Thickness(0)));
 
-                //style.Add(new Setter(Layoutable.HeightProperty, 18.0));
                 ListBox0.Styles.Add(style);
             }
 
-            /* equivalent to this axaml
-            
-		    <ListBox.Styles>
-			    <Style Selector="ListBoxItem">
-				    <Setter Property="MinHeight" Value="8"/>
-				    <Setter Property="Height" Value="15"/>
-			    </Style>
-		    </ListBox.Styles>             
-            */
-            /*
-		    <ListBox.ItemTemplate>
-			    <DataTemplate
-                    x:DataType="ctrl:ListViewItem"
-				    >
-				    <TextBlock Text="{Binding Text}"
-						       Foreground="{Binding ForeColorBrush}"
-						       Background="{Binding BackColorBrush}"
-						       Height="8"
-						       FontSize="8"
-						       Margin="0 0 0 0"
-						       Padding="0"
-						       />
-			    </DataTemplate>
-		    </ListBox.ItemTemplate>
-             */
         }
         public ObservableCollection<ListViewItem> Items = new ObservableCollection<ListViewItem>();
 

@@ -5,24 +5,6 @@
 			 xmlns:ctrl="clr-namespace:AjkAvaloniaLibs.Controls;assembly=AjkAvaloniaLibs"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
              x:Class="AjkAvaloniaLibs.Controls.ListViewControl">
-	<ListBox
-		Name="ListBox0"
-        x:DataType="ctrl:ListViewControl"
-        ItemsSource="{Binding Items}"
-        >
-		<ListBox.ItemTemplate>
-			<DataTemplate
-                x:DataType="ctrl:ListViewItem"
-				>
-				<TextBlock Text="{Binding Text}"
-						   Foreground="{Binding ForeColorBrush}"
-						   Background="{Binding BackColorBrush}"
-						   Margin="0 0 0 0"
-						   Padding="0"
-						   />
-			</DataTemplate>
-		</ListBox.ItemTemplate>
-	</ListBox>
-
+	<ListBox Name="ListBox0" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
 
 </UserControl>
