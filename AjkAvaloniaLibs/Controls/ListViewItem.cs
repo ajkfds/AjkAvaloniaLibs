@@ -60,20 +60,20 @@ namespace AjkAvaloniaLibs.Controls
             updateVisual();
         }
 
-        public StackPanel StackPanel = new StackPanel()
+        private StackPanel StackPanel = new StackPanel()
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
             Margin = new Thickness(0, 0, 0, 0),
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
         };
 
-        public Avalonia.Controls.Image IconImage = new Avalonia.Controls.Image()
+        private Avalonia.Controls.Image IconImage = new Avalonia.Controls.Image()
         {
             Margin = new Thickness(0, 0, 0, 0),
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
         };
 
-        public TextBlock TextBlock = new TextBlock()
+        private TextBlock TextBlock = new TextBlock()
         {
             Margin = new Thickness(0, 0, 0, 0),
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
@@ -100,10 +100,10 @@ namespace AjkAvaloniaLibs.Controls
         {
             StackPanel.Height = FontSize * 1.2;
             TextBlock.FontSize = FontSize;
-            //IconImage.Width = FontSize;
-            //IconImage.Height = FontSize;
-            //IconImage.Source = Image;
-            //IconImage.Margin = new Thickness(0, 0, FontSize * 0.2, 0);
+            IconImage.Width = FontSize;
+            IconImage.Height = FontSize;
+            IconImage.Source = Image;
+            IconImage.Margin = new Thickness(0, 0, FontSize * 0.2, 0);
 
             if (IsSelected)
             {

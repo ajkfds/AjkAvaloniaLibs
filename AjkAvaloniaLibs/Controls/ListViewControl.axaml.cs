@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Styling;
+using DynamicData;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -21,8 +22,15 @@ namespace AjkAvaloniaLibs.Controls
             {
                 Items.Add(new ListViewItem("item0", Avalonia.Media.Colors.Red));
                 Items.Add(new ListViewItem("item1", Avalonia.Media.Colors.Blue));
-                Items.Add(new ListViewItem("item2", Avalonia.Media.Colors.Green));
-                for(int i = 3; i < 100; i++)
+
+                ListViewItem item = new ListViewItem("item2", Avalonia.Media.Colors.Green);
+                item.Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/paper.svg");
+                //                "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg"///,
+                ////                Avalonia.Media.Colors.AliceBlue
+                //                );
+                Items.Add(item);
+
+                for (int i = 3; i < 10; i++)
                 {
                     Items.Add(new ListViewItem("item"+i.ToString(), Avalonia.Media.Colors.Gray));
                 }
