@@ -98,7 +98,7 @@ namespace AjkAvaloniaLibs.Controls
         public Avalonia.Media.Color SelectedBackgroundColor { get; set; } = Avalonia.Media.Colors.DarkBlue;
         internal void updateVisual()
         {
-            StackPanel.Height = FontSize * 1.2;
+            StackPanel.Height = FontSize * 1.4;
             TextBlock.FontSize = FontSize;
             IconImage.Width = FontSize;
             IconImage.Height = FontSize;

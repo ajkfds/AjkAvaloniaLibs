@@ -1,10 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Avalonia.Remote.Protocol;
 using Avalonia.Styling;
 using DynamicData;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace AjkAvaloniaLibs.Controls
 {
@@ -17,6 +20,7 @@ namespace AjkAvaloniaLibs.Controls
             DataContext = this;
             ListBox0.ItemsSource = this.Items;
             ListBox0.Background = Background;
+            Items.CollectionChanged += Items_CollectionChanged;
 
             if (Design.IsDesignMode)
             {
@@ -25,9 +29,6 @@ namespace AjkAvaloniaLibs.Controls
 
                 ListViewItem item = new ListViewItem("item2", Avalonia.Media.Colors.Green);
                 item.Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/paper.svg");
-                //                "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg"///,
-                ////                Avalonia.Media.Colors.AliceBlue
-                //                );
                 Items.Add(item);
 
                 for (int i = 3; i < 10; i++)
@@ -48,10 +49,20 @@ namespace AjkAvaloniaLibs.Controls
             }
 
         }
+
         public ObservableCollection<ListViewItem> Items = new ObservableCollection<ListViewItem>();
 
-//        public double FontSize { set; get; } = 8;
-//        public double MinHeight { set; get; } = 8;
+        private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems == null) return;
+
+            foreach(var item in e.NewItems)
+            {
+                ListViewItem? listViewItem = item as ListViewItem;
+                if (listViewItem != null) listViewItem.FontSize = FontSize;
+            }
+        }
+
         public new double MaxHeight
         {
             set
