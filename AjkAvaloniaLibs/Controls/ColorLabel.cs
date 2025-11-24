@@ -228,6 +228,7 @@ namespace AjkAvaloniaLibs.Controls
                     {
                         image.Width = textBlock.FontSize;
                         image.Height = textBlock.FontSize;
+                        image.Margin = new Avalonia.Thickness(textBlock.FontSize * 0.1, 0, textBlock.FontSize * 0.1, 0);
                         image.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
                     }
                     else
