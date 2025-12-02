@@ -60,20 +60,20 @@ namespace AjkAvaloniaLibs.Controls
             updateVisual();
         }
 
-        private StackPanel StackPanel = new StackPanel()
+        protected StackPanel StackPanel = new StackPanel()
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
             Margin = new Thickness(0, 0, 0, 0),
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
         };
 
-        private Avalonia.Controls.Image IconImage = new Avalonia.Controls.Image()
+        protected Avalonia.Controls.Image IconImage = new Avalonia.Controls.Image()
         {
             Margin = new Thickness(0, 0, 0, 0),
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
         };
 
-        private TextBlock TextBlock = new TextBlock()
+        protected TextBlock TextBlock = new TextBlock()
         {
             Margin = new Thickness(0, 0, 0, 0),
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
@@ -96,7 +96,7 @@ namespace AjkAvaloniaLibs.Controls
         public Avalonia.Media.Color SelectedForegroundColor { get; set; }= Avalonia.Media.Colors.White;
 
         public Avalonia.Media.Color SelectedBackgroundColor { get; set; } = Avalonia.Media.Colors.DarkBlue;
-        internal void updateVisual()
+        protected virtual void updateVisual()
         {
             StackPanel.Height = FontSize * 1.4;
             TextBlock.FontSize = FontSize;
