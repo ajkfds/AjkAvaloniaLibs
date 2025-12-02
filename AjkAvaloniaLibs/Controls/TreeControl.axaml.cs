@@ -430,9 +430,15 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         foreach (TreeNode subnode in node.Nodes)
         {
             subnode.Visible = false;
-            if (subnode.TreeItem == null) throw new Exception("TreeItem is null");
-            Items.Remove(subnode.TreeItem);
-            subnode.TreeItem = null;
+            if (subnode.TreeItem == null)
+            {
+                if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
+            else
+            {
+                Items.Remove(subnode.TreeItem);
+                subnode.TreeItem = null;
+            }
         }
         foreach (TreeNode subnode in node.Nodes)
         {
