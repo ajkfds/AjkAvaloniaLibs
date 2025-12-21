@@ -166,15 +166,18 @@ namespace AjkAvaloniaLibs.Libs
         {
             string iconName = SvgPath1.Substring(SvgPath1.LastIndexOf('/') + 1);
             if (!SvgPath1.ToLower().EndsWith(".svg")) throw new Exception();
+            
+            // create cashe key
             iconName= iconName.Substring(0, iconName.Length - 4);
             iconName += color1.ToString();
-
             foreach (OverrideIcon icon in overrideIcons)
             {
                 iconName += icon.ID;
             }
+            // return cashed icon if it cashed
             if (iconImages.ContainsKey(iconName)) return iconImages[iconName];
 
+            // creare bitmap
             SKBitmap skBitmap1 = getSkBitmapFromSvg(SvgPath1, 1f, 1f, color1);
 
             using SKCanvas canvas = new SKCanvas(skBitmap1);
@@ -188,15 +191,15 @@ namespace AjkAvaloniaLibs.Libs
                 iconName2 = iconName2.Substring(0, iconName2.Length - 4);
                 iconName2 += icon.Color.ToString();
                 float size = 1;
-                switch (icon.OverridePosition)
-                {
-                    case OverridePosition.Fill:
-                        size = 1;
-                        break;
-                    default:
-                        size = 0.5f;
-                        break;
-                }
+                //switch (icon.OverridePosition)
+                //{
+                //    case OverridePosition.Fill:
+                //        size = 1;
+                //        break;
+                //    default:
+                //        size = 0.5f;
+                //        break;
+                //}
                 SKBitmap skBitmap2 = getSkBitmapFromSvg(icon.SvgPath, size, size, icon.Color);
                 using var paint = new SKPaint
                 {
@@ -228,7 +231,6 @@ namespace AjkAvaloniaLibs.Libs
             }
 
             Bitmap bmp = getBitmapFromSKBitmap(skBitmap1);
-
 
             lock (iconImages)
             {
