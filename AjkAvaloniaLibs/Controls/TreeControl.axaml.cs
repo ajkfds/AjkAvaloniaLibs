@@ -287,6 +287,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
     private void addNode(TreeNode node)
     {
+        System.Diagnostics.Debug.Print("## node add visual " + node.Text);
         if (node._parent == null)
         {
             node._parent = new WeakReference<ITreeNodeOwner>(this);
@@ -331,12 +332,12 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                     Items.Insert(index + 1, new TreeViewItem(node, this));
                 }
             }
+            foreach (TreeNode subNode in node.Nodes)
+            {
+                addNode(subNode);
+            }
         }
 
-        foreach(TreeNode subNode in node.Nodes)
-        {
-            addNode(subNode);
-        }
     }
 
     private void removeNode(TreeNode node)

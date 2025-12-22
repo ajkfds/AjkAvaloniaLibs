@@ -96,6 +96,7 @@ namespace AjkAvaloniaLibs.Controls
             {
                 bool prev = _IsExpanded;
                 _IsExpanded = value;
+                updateIndent();
                 NotifyPropertyChanged();
                 if (!prev & _IsExpanded)
                 {
@@ -198,6 +199,7 @@ namespace AjkAvaloniaLibs.Controls
             {
                 foreach (TreeNode node in e.NewItems)
                 {
+                    System.Diagnostics.Debug.Print("## node add "+node.Text );
                     node.parent = this;
                     node.updateIndent();
                     node.PropageteCollectionChange += Nodes_CollectionChangeInform;
@@ -225,6 +227,7 @@ namespace AjkAvaloniaLibs.Controls
 
             foreach (TreeNode node in Nodes)
             {
+                node.parent = this;
                 node.updateIndent();
             }
         }
