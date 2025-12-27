@@ -4,6 +4,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using DynamicData;
 using ExCSS;
+using Splat.ModeDetection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,16 +38,16 @@ namespace AjkAvaloniaLibs.Controls
                 if (_parent == null) return null;
                 if (!_parent.TryGetTarget(out owner)) return null;
 
-                // get owenerNodes,ownerTreeNode
+                // get subnode lists which this node owner has
                 ObservableCollection<TreeNode>? ownerNodes;
 
                 TreeNode? ownerTreeNode = null;
-                if (owner is TreeNode)
+                if (owner is TreeNode) // this is a subnode of a treenode
                 {
                     ownerNodes = ((TreeNode)owner).Nodes;
                     ownerTreeNode = (TreeNode)owner;
                 }
-                else if (owner is TreeControl)
+                else if (owner is TreeControl) // this is root node
                 {
                     ownerNodes = ((TreeControl)owner).Nodes;
                 }
@@ -96,7 +97,7 @@ namespace AjkAvaloniaLibs.Controls
             {
                 bool prev = _IsExpanded;
                 _IsExpanded = value;
-                updateIndent();
+                UpdateIndent(this);
                 NotifyPropertyChanged();
                 if (!prev & _IsExpanded)
                 {
@@ -184,28 +185,77 @@ namespace AjkAvaloniaLibs.Controls
         public Action<object?, System.Collections.Specialized.NotifyCollectionChangedEventArgs>? CollectionChanged { get; set; } = null;
         private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                OnCollectionChanged(sender,e);
+            }
+            else
+            {
+                Dispatcher.UIThread.Post(() => OnCollectionChanged(sender,e));
+            }
+        }
+
+        private void OnCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
             if (!Dispatcher.UIThread.CheckAccess()) throw new Exception();
+
+
+            UpdateIndent(this);
+
             if (e.OldItems != null)
             {
                 foreach (TreeNode node in e.OldItems)
                 {
-                    node.parent = null;
-                    node.Indent = 0;
                     node.PropageteCollectionChange -= Nodes_CollectionChangeInform;
                     node.PropertyChanged -= Node_PropertyChanged;
                 }
             }
-            if (e.NewItems != null)
+
+            //            if (Indent == -1) return;
+            /*
+            System.Diagnostics.Debug.Print("");
+            System.Diagnostics.Debug.Print("### Node_CollectionChanged : " + Text);
+            System.Diagnostics.Debug.Print("### Indent : " + Indent.ToString());
+            System.Diagnostics.Debug.Print("### Action : " + e.Action.ToString());
+
+            switch (e.Action)
             {
-                foreach (TreeNode node in e.NewItems)
-                {
-                    System.Diagnostics.Debug.Print("## node add "+node.Text );
-                    node.parent = this;
-                    node.updateIndent();
-                    node.PropageteCollectionChange += Nodes_CollectionChangeInform;
-                    node.PropertyChanged += Node_PropertyChanged;
-                }
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                    if (e.OldItems != null)
+                    {
+                        foreach (TreeNode node in e.OldItems)
+                        {
+                            System.Diagnostics.Debug.Print("### OldItems : " + node.Text);
+                            //if (node.Text == "MODULE5_0 - MODULE5") System.Diagnostics.Debugger.Break();
+                            //node.parent = null;
+                            //node.Indent = -1;
+                            node.PropageteCollectionChange -= Nodes_CollectionChangeInform;
+                            node.PropertyChanged -= Node_PropertyChanged;
+                        }
+                    }
+                    if (e.NewItems != null)
+                    {
+                        foreach (TreeNode node in e.NewItems)
+                        {
+                            System.Diagnostics.Debug.Print("### NewItems : " + node.Text);
+                            //                            if (node.Text == "MODULE2_0 - MODULE2") System.Diagnostics.Debugger.Break();
+                            //                            if (node.Text == "MODULE5_0 - MODULE5") System.Diagnostics.Debugger.Break();
+                            node.parent = this;
+                            node.Indent = Indent + 1; //updateIndent();
+                            node.PropageteCollectionChange += Nodes_CollectionChangeInform;
+                            node.PropertyChanged += Node_PropertyChanged;
+                        }
+                    }
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                    break;
+                default:
+                    return;
             }
+            */
             // raise upper layer
             if (TreeItem != null) TreeItem.updateVisual();
             if (PropageteCollectionChange != null)
@@ -214,21 +264,18 @@ namespace AjkAvaloniaLibs.Controls
             }
         }
 
-        internal void updateIndent()
+        internal void UpdateIndent(TreeNode ownerNode)
         {
-            if (Parent != null)
-            {
-                Indent = Parent.Indent+1;
-            }
-            else
-            {
-                Indent = 0;
-            }
-
-            foreach (TreeNode node in Nodes)
+            foreach (TreeNode node in ownerNode.Nodes)
             {
                 node.parent = this;
-                node.updateIndent();
+                node.PropageteCollectionChange = Nodes_CollectionChangeInform;
+                node.PropertyChanged = Node_PropertyChanged;
+                if (ownerNode.Indent+1 != node.Indent)
+                {
+                    node.Indent = ownerNode.Indent+1;
+                    UpdateIndent(node);
+                }
             }
         }
 
