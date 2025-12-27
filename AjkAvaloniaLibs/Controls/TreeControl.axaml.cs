@@ -50,6 +50,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             if (i.Delta.Y > 0) FontSize++;
             else FontSize = FontSize > 1 ? FontSize - 1 : 1;
             FontSize = FontSize;
+            if (OnFontSizeChanged != null) OnFontSizeChanged(FontSize);
             updateVisual();
         }, Avalonia.Interactivity.RoutingStrategies.Bubble, true);
 
@@ -81,6 +82,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         }
 
     }
+    public Action<double>? OnFontSizeChanged = null;
 
     private void TreeControl_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
     {
@@ -194,7 +196,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 node.Indent = 0;
                 node.PropertyChanged += Node_PropertyChanged;
                 node.PropageteCollectionChange += PropageteCollectionChange;
-                node.updateIndent();
+                node.UpdateIndent(node);
             }
         }
         if (e.OldItems != null)
@@ -203,7 +205,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             {
                 node.parent = null;
                 node.Indent = 0;
-                node.updateIndent();
+                node.UpdateIndent(node);
                 node.PropertyChanged -= Node_PropertyChanged;
                 node.PropageteCollectionChange -= PropageteCollectionChange;
             }
@@ -287,7 +289,15 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
     private void addNode(TreeNode node)
     {
-        System.Diagnostics.Debug.Print("## node add visual " + node.Text);
+        //if (Nodes.Count(x => x == node) > 1)
+        //{
+        //    // duplicate node
+
+        //    if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+        //    return;
+        //}
+
+        //System.Diagnostics.Debug.Print("## node add visual " + node.Text);
         if (node._parent == null)
         {
             node._parent = new WeakReference<ITreeNodeOwner>(this);
