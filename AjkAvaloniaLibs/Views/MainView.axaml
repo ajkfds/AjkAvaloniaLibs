@@ -31,9 +31,6 @@
 		<TabItem Header="ColorLabel">
 			<controls:ColorLabelControl Name="ColorLabel1"/>
 		</TabItem>
-		<TabItem Header="Grid">
-			<controls:GridControl></controls:GridControl>
-		</TabItem>
 	</TabControl>
 
 </UserControl>
