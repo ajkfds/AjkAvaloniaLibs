@@ -15,7 +15,7 @@ namespace AjkAvaloniaLibs.Libs
         public IBrowser? Browser = null;
         public IBrowserContext? BrowserContext = null;
         public IPage? Page = null;
-        public async Task Browsw(string url)
+        public async Task Browse(string url)
         {
             using var playwright = await Playwright.CreateAsync();
 
