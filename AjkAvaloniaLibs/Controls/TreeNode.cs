@@ -1,4 +1,4 @@
-﻿using AjkAvaloniaLibs.Libs;
+using AjkAvaloniaLibs.Libs;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;

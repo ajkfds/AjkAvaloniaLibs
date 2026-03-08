@@ -1,4 +1,4 @@
-﻿namespace AjkAvaloniaLibs.ViewModels;
+namespace AjkAvaloniaLibs.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {

@@ -1,4 +1,4 @@
-﻿using AjkAvaloniaLibs.ViewModels;
+using AjkAvaloniaLibs.ViewModels;
 using AjkAvaloniaLibs.Views;
 
 using Avalonia;
