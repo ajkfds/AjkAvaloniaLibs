@@ -125,7 +125,7 @@ namespace AjkAvaloniaLibs.Controls
 
         internal bool Visible = false;
 
-        // 隕ｪ繝弱・繝・WeakReference縺ｧ菫晄戟縺吶ｋ
+        // 親ノード WeakReferenceで保持する
         internal System.WeakReference<ITreeNodeOwner>? _parent = null;
         internal ITreeNodeOwner? parent
         {
@@ -292,25 +292,25 @@ namespace AjkAvaloniaLibs.Controls
         }
 
 
-        // 繝弱・繝牙ｱ暮幕譎ゅ↓蜻ｼ縺ｰ繧後ｋ
+        // ノード展開時に呼ばれる
         public virtual void OnExpand() { }
 
-        // 繝弱・繝峨ｒ髢峨§縺溘→縺阪↓蜻ｼ縺ｰ繧後ｋ
+        // ノードを閉じたときに呼ばれる
         public virtual void OnCollapse() { }
 
-        // 繝弱・繝峨′驕ｸ謚槭＆繧後◆縺ｨ縺阪↓蜻ｼ縺ｰ繧後ｋ
+        // ノードが選択されたときに呼ばれる
         public virtual void OnSelected() { }
 
 
         public virtual void OnDeSelected() { }
 
-        // 繝弱・繝峨′繧ｯ繝ｪ繝・け縺輔ｌ縺溘→縺阪↓蜻ｼ縺ｰ繧後ｋ
+        // ノードがクリックされたときに呼ばれる
         public virtual void OnClicked() { }
 
-        // 繝弱・繝峨′繝繝悶Ν繧ｯ繝ｪ繝・け縺輔ｌ縺溘→縺阪↓蜻ｼ縺ｰ繧後ｋ
+        // ノードがダブルクリックされたときに呼ばれる
         public virtual void OnDoubleClicked() { }
 
-        // 繝弱・繝峨ユ繧ｭ繧ｹ繝・
+        // ノードテキスト
         private string _Text = "";
         public string Text
         {
@@ -319,7 +319,7 @@ namespace AjkAvaloniaLibs.Controls
         }
         public int Indent { get; set; } = 0;
 
-        // 蜿梧婿蜷腺Inding縺ｮ縺溘ａ縺ｮViewModel縺ｸ縺ｮProperty螟画峩騾夂衍
+        // 双方向BIndingのためのViewModelへのProperty変更通知
         public event PropertyChangedEventHandler? PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
         {
