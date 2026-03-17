@@ -115,9 +115,11 @@ namespace AjkAvaloniaLibs.Controls
         private bool _selected = false;
         public bool Selected {
             get { return _selected; } 
-            internal set {
+            set {
+                if (_selected == value) return;
                 _selected = value;
                 if(TreeItem != null) TreeItem.updateVisual();
+                NotifyPropertyChanged(nameof(Selected));
             } 
         }
         internal Action<TreeNode>? ReportExpanded { get; set; } = null;

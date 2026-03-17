@@ -26,6 +26,10 @@ namespace AjkAvaloniaLibs.Controls;
 
 public partial class TreeControl : UserControl,ITreeNodeOwner
 {
+    // マルチ選択用
+    private HashSet<TreeNode> selectedNodes = new HashSet<TreeNode>();
+    private TreeNode? lastSelectedNodeForShift = null;
+
     public TreeControl()
     {
         ToggleButtonColor = Avalonia.Media.Colors.Gray;
@@ -396,6 +400,131 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         nodeSlected(node);
     }
 
+    // マルチ選択対応 selection handler
+    public void HandleSelection(TreeNode node, KeyModifiers keyModifiers)
+    {
+        if (keyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            // Ctrl+Click: 選択反転
+            ToggleNodeSelection(node);
+            lastSelectedNodeForShift = node;
+        }
+        else if (keyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            // Shift+Click: 範囲選択（同一tree階層のみ）
+            if (lastSelectedNodeForShift != null)
+            {
+                SelectRange(lastSelectedNodeForShift, node);
+            }
+            else
+            {
+                // 最初の場合は通常の単一選択
+                ClearSelection();
+                AddSingleSelection(node);
+            }
+        }
+        else
+        {
+            // 通常クリック: 選択解除して選択
+            ClearSelection();
+            AddSingleSelection(node);
+            lastSelectedNodeForShift = node;
+        }
+    }
+
+    private void ToggleNodeSelection(TreeNode node)
+    {
+        if (selectedNodes.Contains(node))
+        {
+            selectedNodes.Remove(node);
+            node.Selected = false;
+            node.OnDeSelected();
+        }
+        else
+        {
+            selectedNodes.Add(node);
+            node.Selected = true;
+            node.OnSelected();
+        }
+        UpdatePrimarySelection(node);
+    }
+
+    private void SelectRange(TreeNode startNode, TreeNode endNode)
+    {
+        // Itemsコレクションから同一階層のノードを取得
+        var startIndex = -1;
+        var endIndex = -1;
+        int? startIndent = null;
+        
+        // まず開始ノードと同じ階層のノードを見つける
+        for (int i = 0; i < Items.Count; i++)
+        {
+            var item = Items[i];
+            if (item.treeNode == startNode)
+            {
+                startIndex = i;
+                startIndent = startNode.Indent;
+                break;
+            }
+        }
+        
+        if (startIndex < 0 || startIndent == null) return;
+        
+        // 終了ノードを探す（同階層）
+        for (int i = 0; i < Items.Count; i++)
+        {
+            var item = Items[i];
+            if (item.treeNode == endNode && item.treeNode.Indent == startIndent)
+            {
+                endIndex = i;
+                break;
+            }
+        }
+        
+        if (endIndex < 0) return;
+        
+        // 範囲内のノードを選択（同じindentレベルのものだけ）
+        for (int i = Math.Min(startIndex, endIndex); i <= Math.Max(startIndex, endIndex); i++)
+        {
+            var item = Items[i];
+            if (item.treeNode != null && item.treeNode.Indent == startIndent)
+            {
+                if (!selectedNodes.Contains(item.treeNode))
+                {
+                    selectedNodes.Add(item.treeNode);
+                    item.treeNode.Selected = true;
+                    item.treeNode.OnSelected();
+                }
+            }
+        }
+        
+        UpdatePrimarySelection(endNode);
+    }
+
+    private void ClearSelection()
+    {
+        foreach (var node in selectedNodes.ToList())
+        {
+            node.Selected = false;
+            node.OnDeSelected();
+        }
+        selectedNodes.Clear();
+    }
+
+    private void AddSingleSelection(TreeNode node)
+    {
+        selectedNodes.Clear();
+        selectedNodes.Add(node);
+        selectedNode = node;
+        node.Selected = true;
+        node.OnSelected();
+    }
+
+    private void UpdatePrimarySelection(TreeNode node)
+    {
+        selectedNode = node;
+    }
+
     private void nodeSlected(TreeNode node)
     {
         if (selectedNode == node) return;
@@ -413,6 +542,11 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     public TreeNode? GetSelectedNode()
     {
         return selectedNode;
+    }
+
+    public IReadOnlyCollection<TreeNode> GetSelectedNodes()
+    {
+        return selectedNodes;
     }
     private void NodeExpanded(TreeNode node)
     {
@@ -586,14 +720,14 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         private void ToggleButton_PointerPressed(object? sender, PointerPressedEventArgs e)
         {
             if (treeNode == null) return;
-            treeControl.nodeSlected(treeNode); // select node
-//            treeNode.OnClicked();
+            var keyModifiers = e.KeyModifiers;
+            treeControl.HandleSelection(treeNode, keyModifiers); // select node with multi-select support
         }
         private void TreeItem_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
         {
             if (treeNode == null) return;
-            treeControl.nodeSlected(treeNode); // select node
-//            treeNode.OnClicked();
+            var keyModifiers = e.KeyModifiers;
+            treeControl.HandleSelection(treeNode, keyModifiers); // select node with multi-select support
         }
         private void TreeItem_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
