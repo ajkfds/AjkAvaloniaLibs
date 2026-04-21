@@ -1,23 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
+using Avalonia;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using System.IO;
-
+using Avalonia.Skia;
+using ExCSS;
 // SKPictureに対する拡張メソッドとしてSKPicture.ToImageが定義されている。これを使うのに必要。
 using SkiaSharp;
 using Svg.Skia;
-using Avalonia.Skia;
-using Avalonia;
-using System.Runtime.Intrinsics.Arm;
-using ExCSS;
-using Svg;
-using System.Drawing;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
+using System.IO;
+using System.Text;
 
 namespace AjkAvaloniaLibs.Libs
 {
@@ -48,7 +43,7 @@ namespace AjkAvaloniaLibs.Libs
 
             if (iconImages.ContainsKey(iconName)) return iconImages[iconName];
 
-            SKBitmap skBitmap = getSkBitmapFromSvg(SvgPath,1f,1f);
+            SKBitmap skBitmap = getSkBitmapFromSvg(SvgPath, 1f, 1f);
             Bitmap bmp = getBitmapFromSKBitmap(skBitmap);
 
             lock (iconImages)
@@ -67,7 +62,7 @@ namespace AjkAvaloniaLibs.Libs
             iconName += color.ToString();
             if (iconImages.ContainsKey(iconName)) return iconImages[iconName];
 
-            SKBitmap skBitmap = getSkBitmapFromSvg(SvgPath,1f,1f,color);
+            SKBitmap skBitmap = getSkBitmapFromSvg(SvgPath, 1f, 1f, color);
             Bitmap bmp = getBitmapFromSKBitmap(skBitmap);
 
             lock (iconImages)
@@ -157,7 +152,7 @@ namespace AjkAvaloniaLibs.Libs
         {
             return GetSvgBitmap(SvgPath1, color1,
                 new List<OverrideIcon> { new OverrideIcon() { SvgPath = SvgPath2, Color = color2, OverridePosition = OverridePosition.UpRight } }
-                ); 
+                );
         }
         public static Bitmap GetSvgBitmap(
         string SvgPath1, Avalonia.Media.Color color1,
@@ -166,9 +161,9 @@ namespace AjkAvaloniaLibs.Libs
         {
             string iconName = SvgPath1.Substring(SvgPath1.LastIndexOf('/') + 1);
             if (!SvgPath1.ToLower().EndsWith(".svg")) throw new Exception();
-            
+
             // create cashe key
-            iconName= iconName.Substring(0, iconName.Length - 4);
+            iconName = iconName.Substring(0, iconName.Length - 4);
             iconName += color1.ToString();
             foreach (OverrideIcon icon in overrideIcons)
             {
@@ -184,7 +179,7 @@ namespace AjkAvaloniaLibs.Libs
             var pixelSize = new PixelSize((int)skBitmap1.Width, (int)skBitmap1.Height);
             canvas?.DrawBitmap(skBitmap1, 0, 0);
 
-            foreach(OverrideIcon icon in overrideIcons)
+            foreach (OverrideIcon icon in overrideIcons)
             {
                 string iconName2 = icon.SvgPath.Substring(icon.SvgPath.LastIndexOf('/') + 1);
                 if (!icon.SvgPath.ToLower().EndsWith(".svg")) throw new Exception();
@@ -218,10 +213,10 @@ namespace AjkAvaloniaLibs.Libs
                         canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 2, 0);
                         break;
                     case OverridePosition.Center:
-                        canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 4, skBitmap1.Height/4);
+                        canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 4, skBitmap1.Height / 4);
                         break;
                     case OverridePosition.DownLeft:
-                        canvas?.DrawBitmap(skBitmap2, 0, skBitmap1.Height/2);
+                        canvas?.DrawBitmap(skBitmap2, 0, skBitmap1.Height / 2);
                         break;
                     case OverridePosition.DownRight:
                         canvas?.DrawBitmap(skBitmap2, skBitmap1.Width / 2, skBitmap1.Height / 2);
@@ -254,7 +249,7 @@ namespace AjkAvaloniaLibs.Libs
         }
 
 
-        private static SKBitmap getSkBitmapFromSvg(string SvgPath, float scaleX, float scaleY )
+        private static SKBitmap getSkBitmapFromSvg(string SvgPath, float scaleX, float scaleY)
         {
             // get .svg assets as a string
             string svgString;
@@ -275,7 +270,7 @@ namespace AjkAvaloniaLibs.Libs
 
             return skBitmap;
         }
-        private static SKBitmap getSkBitmapFromSvg(string SvgPath, float scaleX,float scaleY, Avalonia.Media.Color color)
+        private static SKBitmap getSkBitmapFromSvg(string SvgPath, float scaleX, float scaleY, Avalonia.Media.Color color)
         {
             // get .svg assets as a string
             string svgString;
@@ -294,14 +289,14 @@ namespace AjkAvaloniaLibs.Libs
             SKBitmap? skBitmap = svg.Picture.ToBitmap(SKColors.Transparent, scaleX, scaleY, SKColorType.Bgra8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb());
             if (skBitmap == null) throw new Exception();
 
-//            var pixelSize = new PixelSize((int)skBitmap.Width, (int)skBitmap.Height);
-//            var dpi = new Vector(96, 96);
+            //            var pixelSize = new PixelSize((int)skBitmap.Width, (int)skBitmap.Height);
+            //            var dpi = new Vector(96, 96);
 
             using SKCanvas canvas = new SKCanvas(skBitmap);
 
-//            using var colorizedRenderTarget = new RenderTargetBitmap(pixelSize, dpi);
-//            using var colorizedContextImpl = colorizedRenderTarget.CreateDrawingContext();
-//            using var colorizedSkiaContext = colorizedContextImpl;
+            //            using var colorizedRenderTarget = new RenderTargetBitmap(pixelSize, dpi);
+            //            using var colorizedContextImpl = colorizedRenderTarget.CreateDrawingContext();
+            //            using var colorizedSkiaContext = colorizedContextImpl;
 
             using var paint = new SKPaint
             {

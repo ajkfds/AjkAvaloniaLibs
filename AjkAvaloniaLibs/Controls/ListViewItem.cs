@@ -1,22 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Media;
-using DynamicData;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AjkAvaloniaLibs.Controls
 {
     public class ListViewItem : ListBoxItem
     {
-        public ListViewItem(string text):this()
+        public ListViewItem(string text) : this()
         {
             Text = text;
         }
@@ -93,7 +83,7 @@ namespace AjkAvaloniaLibs.Controls
 
         public Avalonia.Media.IImage? Image { get; set; }
 
-        public Avalonia.Media.Color SelectedForegroundColor { get; set; }= Avalonia.Media.Colors.White;
+        public Avalonia.Media.Color SelectedForegroundColor { get; set; } = Avalonia.Media.Colors.White;
 
         public Avalonia.Media.Color SelectedBackgroundColor { get; set; } = Avalonia.Media.Colors.DarkBlue;
         protected virtual void updateVisual()

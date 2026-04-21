@@ -1,16 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using ExCSS;
-using HarfBuzzSharp;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AjkAvaloniaLibs.Controls
 {
@@ -82,7 +76,7 @@ namespace AjkAvaloniaLibs.Controls
         {
             public labelImage(IImage image)
             {
-                   this.Image = image;
+                this.Image = image;
             }
             public IImage Image;
             public bool IconSize = false;
@@ -171,7 +165,7 @@ namespace AjkAvaloniaLibs.Controls
             labelImage.IconSize = true;
             items.Add(labelImage);
         }
-        
+
         //public void Draw(Graphics graphics, int x, int y, Font font, Color defaultColor, Color backgroundColor)
         //{
         //    Size size;
@@ -191,12 +185,13 @@ namespace AjkAvaloniaLibs.Controls
             if (items.Last() is labelNewLine)
             {
                 items.RemoveAt(items.Count - 1);
-            } else if(items.Last() is labelText)
+            }
+            else if (items.Last() is labelText)
             {
                 labelText labelText = (labelText)items.Last();
                 if (!labelText.Text.EndsWith("\n")) return;
                 labelText.Text = labelText.Text.Substring(0, labelText.Text.Length - 1);
-                if(labelText.Text.Length==0) items.RemoveAt(items.Count - 1);
+                if (labelText.Text.Length == 0) items.RemoveAt(items.Count - 1);
             }
         }
 
@@ -213,7 +208,8 @@ namespace AjkAvaloniaLibs.Controls
                 {
                     labelText textItem = (labelText)items[i];
                     Run run = new Run(textItem.Text);
-                    if (textItem.Color != null) {
+                    if (textItem.Color != null)
+                    {
                         run.Foreground = new Avalonia.Media.SolidColorBrush((Avalonia.Media.Color)textItem.Color);
                     }
                     textBlock.Inlines.Add(run);

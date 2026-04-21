@@ -1,11 +1,6 @@
-using Avalonia;
 using Avalonia.Data.Converters;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AjkAvaloniaLibs.Controls
 {
@@ -14,7 +9,8 @@ namespace AjkAvaloniaLibs.Controls
         public static SizeConverter RowSize { get; } = new SizeConverter(1.5);
         public static SizeConverter IconSize { get; } = new SizeConverter(0.8);
 
-        public SizeConverter(double multiply) { 
+        public SizeConverter(double multiply)
+        {
             this._multiply = multiply;
         }
 

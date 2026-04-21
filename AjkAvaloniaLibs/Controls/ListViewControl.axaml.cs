@@ -1,11 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Remote.Protocol;
 using Avalonia.Styling;
 using DynamicData;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
@@ -33,7 +30,7 @@ namespace AjkAvaloniaLibs.Controls
 
                 for (int i = 3; i < 10; i++)
                 {
-                    Items.Add(new ListViewItem("item"+i.ToString(), Avalonia.Media.Colors.Gray));
+                    Items.Add(new ListViewItem("item" + i.ToString(), Avalonia.Media.Colors.Gray));
                 }
             }
 
@@ -56,7 +53,7 @@ namespace AjkAvaloniaLibs.Controls
         {
             if (e.NewItems == null) return;
 
-            foreach(var item in e.NewItems)
+            foreach (var item in e.NewItems)
             {
                 ListViewItem? listViewItem = item as ListViewItem;
                 if (listViewItem != null) listViewItem.FontSize = FontSize;
@@ -116,7 +113,7 @@ namespace AjkAvaloniaLibs.Controls
             }
         }
 
-        
+
 
     }
 }

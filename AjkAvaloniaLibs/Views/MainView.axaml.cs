@@ -1,6 +1,5 @@
 using AjkAvaloniaLibs.Controls;
 using Avalonia.Controls;
-using ExCSS;
 
 namespace AjkAvaloniaLibs.Views;
 
@@ -42,8 +41,8 @@ public partial class MainView : UserControl
         // Color Label
         ColorLabel label = new ColorLabel();
         label.AppendText("Block1");
-        label.AppendText("Bl\r\nock2",Avalonia.Media.Colors.Red);
-        label.AppendText("Block3",Avalonia.Media.Colors.Blue);
+        label.AppendText("Bl\r\nock2", Avalonia.Media.Colors.Red);
+        label.AppendText("Block3", Avalonia.Media.Colors.Blue);
 
         ColorLabel1.Add(label);
 

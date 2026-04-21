@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AjkAvaloniaLibs.Libs.Json
 {
-    public class JsonWriter : IDisposable,IJson
+    public class JsonWriter : IDisposable, IJson
     {
         public JsonWriter(System.IO.StreamWriter streamWriter)
         {
@@ -62,7 +59,7 @@ namespace AjkAvaloniaLibs.Libs.Json
         protected System.IO.StreamWriter streamWriter;
         protected int tabs = 0;
         protected bool firstElement = true;
-        
+
 
         public void writeKeyValue(string key, int value)
         {
@@ -153,7 +150,7 @@ namespace AjkAvaloniaLibs.Libs.Json
             return json;
         }
 
-        public class JsonArrayWriter : IDisposable,IJson
+        public class JsonArrayWriter : IDisposable, IJson
         {
             internal JsonArrayWriter(System.IO.StreamWriter streamWriter, int tabs)
             {

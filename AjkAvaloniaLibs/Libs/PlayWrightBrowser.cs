@@ -1,10 +1,6 @@
 using Microsoft.Playwright;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 
 namespace AjkAvaloniaLibs.Libs
 {
@@ -41,7 +37,7 @@ namespace AjkAvaloniaLibs.Libs
                 ViewportSize = new ViewportSize { Width = 1366, Height = 768 }
             });
 
-           Page = await BrowserContext.NewPageAsync();
+            Page = await BrowserContext.NewPageAsync();
 
             //// 最後まで待つ or スクリーンショットを取る
             //await page.WaitForTimeoutAsync(3000);
@@ -49,10 +45,10 @@ namespace AjkAvaloniaLibs.Libs
             await Page.GotoAsync(url);
             await Task.Delay(rand.Next(100, 200));
 
-//            await Page.FillAsync("#APjFqb", "Playwright");
-//            await Page.Keyboard.PressAsync("Enter");
+            //            await Page.FillAsync("#APjFqb", "Playwright");
+            //            await Page.Keyboard.PressAsync("Enter");
 
-//            await Task.Delay(rand.Next(100, 200));
+            //            await Task.Delay(rand.Next(100, 200));
         }
     }
 }

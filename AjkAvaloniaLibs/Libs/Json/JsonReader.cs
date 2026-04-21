@@ -1,17 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AjkAvaloniaLibs.Libs.Json
 {
-    public class JsonReader : IDisposable,IJson
+    public class JsonReader : IDisposable, IJson
     {
         public JsonReader(System.IO.StreamReader streamReader)
         {
             this.streamReader = streamReader;
-            if(nextToken == null) nextToken = getToken();
+            if (nextToken == null) nextToken = getToken();
             if (nextToken != "{") throw new Exception();
             nextToken = null;
         }
@@ -57,7 +55,7 @@ namespace AjkAvaloniaLibs.Libs.Json
                 {
                     childJson = null;
                     nextToken = getToken();
-                    if(nextToken ==",") nextToken = getToken();
+                    if (nextToken == ",") nextToken = getToken();
                 }
                 else throw new Exception("illegal format");
             }
@@ -70,14 +68,14 @@ namespace AjkAvaloniaLibs.Libs.Json
                 return null;
             }
 
-            if(nextToken.Length < 2 || nextToken.First() != '\"' || nextToken.Last() != '\"')
+            if (nextToken.Length < 2 || nextToken.First() != '\"' || nextToken.Last() != '\"')
             {
                 System.Diagnostics.Debugger.Break();
                 throw new Exception("illegal format");
             }
             string token = nextToken;
             nextToken = getToken();
-            if(nextToken != ":")
+            if (nextToken != ":")
             {
                 throw new Exception("illegal format");
             }
@@ -96,7 +94,7 @@ namespace AjkAvaloniaLibs.Libs.Json
             int value;
             if (!int.TryParse(nextToken, out value)) throw new Exception("illegal format");
             nextToken = getToken();
-            if(nextToken == ",") nextToken = getToken();
+            if (nextToken == ",") nextToken = getToken();
             return value;
         }
 
@@ -128,7 +126,7 @@ namespace AjkAvaloniaLibs.Libs.Json
         {
             if (nextToken == null) nextToken = getToken();
             if (nextToken == null) throw new Exception("illegal format");
-            if(nextToken != "[" && nextToken != "{")
+            if (nextToken != "[" && nextToken != "{")
             {
                 nextToken = getToken();
                 if (nextToken == ",") nextToken = getToken();
@@ -137,9 +135,11 @@ namespace AjkAvaloniaLibs.Libs.Json
             int bracketCount = 0;
             while (true)
             {
-                if(nextToken == "[" || nextToken == "{"){
+                if (nextToken == "[" || nextToken == "{")
+                {
                     bracketCount++;
-                }else if(nextToken == "]" || nextToken == "}")
+                }
+                else if (nextToken == "]" || nextToken == "}")
                 {
                     bracketCount--;
                 }
@@ -211,7 +211,7 @@ namespace AjkAvaloniaLibs.Libs.Json
                         sb.Append(nextChar);
                         nextChar = null;
 
-                        if(streamReader.EndOfStream) sb.ToString();
+                        if (streamReader.EndOfStream) sb.ToString();
                         nextChar = (char)streamReader.Read();
                         break;
                 }
@@ -246,9 +246,9 @@ namespace AjkAvaloniaLibs.Libs.Json
             //
             //      unescaped = % x20 - 21 / % x23 - 5B / % x5D - 10FFFF
 
-            while (nextChar !='\"')
+            while (nextChar != '\"')
             {
-                if(nextChar == System.IO.Path.DirectorySeparatorChar) // escape
+                if (nextChar == System.IO.Path.DirectorySeparatorChar) // escape
                 {
                     if (streamReader.EndOfStream) throw new Exception("illegal format");
                     nextChar = (char)streamReader.Read();
@@ -284,7 +284,8 @@ namespace AjkAvaloniaLibs.Libs.Json
                             if (streamReader.EndOfStream) throw new Exception("illegal format");
                             char d3 = (char)streamReader.Read();
                             int value;
-                            if (!int.TryParse(d0.ToString() + d1 + d2 + nextChar, System.Globalization.NumberStyles.HexNumber, System.Threading.Thread.CurrentThread.CurrentCulture, out value)){
+                            if (!int.TryParse(d0.ToString() + d1 + d2 + nextChar, System.Globalization.NumberStyles.HexNumber, System.Threading.Thread.CurrentThread.CurrentCulture, out value))
+                            {
                                 if (streamReader.EndOfStream) throw new Exception("illegal format");
                             }
                             sb.Append((char)value);

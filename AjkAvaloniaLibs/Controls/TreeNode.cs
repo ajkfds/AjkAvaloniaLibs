@@ -1,24 +1,14 @@
-using AjkAvaloniaLibs.Libs;
-using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
-using DynamicData;
-using ExCSS;
-using Splat.ModeDetection;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace AjkAvaloniaLibs.Controls
 {
-    public class TreeNode : INotifyPropertyChanged,ITreeNodeOwner
+    public class TreeNode : INotifyPropertyChanged, ITreeNodeOwner
     {
         public TreeNode()
         {
@@ -31,8 +21,10 @@ namespace AjkAvaloniaLibs.Controls
         }
 
         public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
-        internal TreeNode? NextTo {
-            get {
+        internal TreeNode? NextTo
+        {
+            get
+            {
                 // get owner
                 ITreeNodeOwner? owner;
                 if (_parent == null) return null;
@@ -75,7 +67,7 @@ namespace AjkAvaloniaLibs.Controls
         }
 
         private IImage? bitmap = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/paper.svg");
-        public  IImage? Image
+        public IImage? Image
         {
             get
             {
@@ -101,26 +93,28 @@ namespace AjkAvaloniaLibs.Controls
                 NotifyPropertyChanged();
                 if (!prev & _IsExpanded)
                 {
-                    if(ReportExpanded != null) ReportExpanded(this);
+                    if (ReportExpanded != null) ReportExpanded(this);
                     OnExpand();
                 }
                 if (prev & !_IsExpanded)
                 {
-                    if(ReportCollapsed != null) ReportCollapsed(this);
+                    if (ReportCollapsed != null) ReportCollapsed(this);
                     OnCollapse();
                 }
             }
         }
 
         private bool _selected = false;
-        public bool Selected {
-            get { return _selected; } 
-            set {
+        public bool Selected
+        {
+            get { return _selected; }
+            set
+            {
                 if (_selected == value) return;
                 _selected = value;
-                if(TreeItem != null) TreeItem.updateVisual();
+                if (TreeItem != null) TreeItem.updateVisual();
                 NotifyPropertyChanged(nameof(Selected));
-            } 
+            }
         }
         internal Action<TreeNode>? ReportExpanded { get; set; } = null;
         internal Action<TreeNode>? ReportCollapsed { get; set; } = null;
@@ -189,11 +183,11 @@ namespace AjkAvaloniaLibs.Controls
         {
             if (Dispatcher.UIThread.CheckAccess())
             {
-                OnCollectionChanged(sender,e);
+                OnCollectionChanged(sender, e);
             }
             else
             {
-                Dispatcher.UIThread.Post(() => OnCollectionChanged(sender,e));
+                Dispatcher.UIThread.Post(() => OnCollectionChanged(sender, e));
             }
         }
 
@@ -273,9 +267,9 @@ namespace AjkAvaloniaLibs.Controls
                 node.parent = this;
                 node.PropageteCollectionChange = Nodes_CollectionChangeInform;
                 node.PropertyChanged = Node_PropertyChanged;
-                if (ownerNode.Indent+1 != node.Indent)
+                if (ownerNode.Indent + 1 != node.Indent)
                 {
-                    node.Indent = ownerNode.Indent+1;
+                    node.Indent = ownerNode.Indent + 1;
                     UpdateIndent(node);
                 }
             }

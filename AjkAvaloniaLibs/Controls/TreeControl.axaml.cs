@@ -1,20 +1,8 @@
-using AjkAvaloniaLibs.Controls;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using Avalonia.Input.TextInput;
-using Avalonia.Markup.Xaml;
 using Avalonia.Media;
-using Avalonia.Remote.Protocol;
-using Avalonia.Styling;
-using Avalonia.VisualTree;
-using DynamicData;
-using DynamicData.Binding;
 using ExCSS;
-using ReactiveUI;
-using ShimSkiaSharp;
-using Svg;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,7 +12,7 @@ using System.Linq;
 
 namespace AjkAvaloniaLibs.Controls;
 
-public partial class TreeControl : UserControl,ITreeNodeOwner
+public partial class TreeControl : UserControl, ITreeNodeOwner
 {
     // マルチ選択用
     private HashSet<TreeNode> selectedNodes = new HashSet<TreeNode>();
@@ -46,7 +34,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         // Workaround for the issue where the bottom item may be hidden under the horizontal scrollbar
         // and becomes unclickable when scrolled to the lower limit.
         // Extends the scrollable range to allow further scrolling below the limit.
-        Items.Add( new TreeViewItem(this) ); // add blank
+        Items.Add(new TreeViewItem(this)); // add blank
 
         this.AddHandler(PointerWheelChangedEvent, (o, i) =>
         {
@@ -131,9 +119,10 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                     nodeSlected(parent);
                 }
             }
-        }else if(e.Key == Avalonia.Input.Key.Right)
+        }
+        else if (e.Key == Avalonia.Input.Key.Right)
         {
-            if(selectedNode.IsExpanded)
+            if (selectedNode.IsExpanded)
             {
                 selectedNode.IsExpanded = false;
                 treeItem.updateVisual();
@@ -150,15 +139,18 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     }
 
     Avalonia.Media.Color toggleButtonColor;
-    public Avalonia.Media.Color ToggleButtonColor {
-        get {
-            return toggleButtonColor; 
-        } 
-        set { 
-            if(toggleButtonColor == value) return;
+    public Avalonia.Media.Color ToggleButtonColor
+    {
+        get
+        {
+            return toggleButtonColor;
+        }
+        set
+        {
+            if (toggleButtonColor == value) return;
             toggleButtonColor = value;
             updateVisual();
-        } 
+        }
     }
     public Avalonia.Media.Color SelectedForegroundColor { get; set; }
     public Avalonia.Media.Color SelectedBackgroundColor { get; set; }
@@ -214,7 +206,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 node.PropageteCollectionChange -= PropageteCollectionChange;
             }
         }
-        PropageteCollectionChange(this,e);
+        PropageteCollectionChange(this, e);
     }
 
     private void Node_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -252,12 +244,12 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 if (sender is TreeNode ownerNode)
                 {
                     TreeViewItem? ownerItem = ownerNode.TreeItem;
-                    if(ownerItem != null)
+                    if (ownerItem != null)
                     {
                         removeAllTreeItem(ownerItem);
                     }
                 }
-                else if(sender is TreeControl)
+                else if (sender is TreeControl)
                 {
                     foreach (TreeViewItem item in Items)
                     {
@@ -356,7 +348,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
     private void removeNode(TreeNode node)
     {
-        if(selectedNode == node)
+        if (selectedNode == node)
         {
             selectedNode = null;
         }
@@ -374,15 +366,15 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
         // fix visuals
         List<TreeViewItem> removeItems = new List<TreeViewItem>();
-        foreach(TreeViewItem? item in Items)
+        foreach (TreeViewItem? item in Items)
         {
-            if(item.treeNode == node)
+            if (item.treeNode == node)
             {
                 removeItems.Add(item);
             }
         }
 
-        foreach(TreeViewItem removeItem in removeItems)
+        foreach (TreeViewItem removeItem in removeItems)
         {
             Items.Remove(removeItem);
         }
@@ -455,7 +447,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         var startIndex = -1;
         var endIndex = -1;
         int? startIndent = null;
-        
+
         // まず開始ノードと同じ階層のノードを見つける
         for (int i = 0; i < Items.Count; i++)
         {
@@ -467,9 +459,9 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 break;
             }
         }
-        
+
         if (startIndex < 0 || startIndent == null) return;
-        
+
         // 終了ノードを探す（同階層）
         for (int i = 0; i < Items.Count; i++)
         {
@@ -480,9 +472,9 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 break;
             }
         }
-        
+
         if (endIndex < 0) return;
-        
+
         // 範囲内のノードを選択（同じindentレベルのものだけ）
         for (int i = Math.Min(startIndex, endIndex); i <= Math.Max(startIndex, endIndex); i++)
         {
@@ -497,7 +489,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 }
             }
         }
-        
+
         UpdatePrimarySelection(endNode);
     }
 
@@ -558,7 +550,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         {
             subnode.Visible = true;
             subnode.Indent = node.Indent + 1;
-            TreeViewItem item = new TreeViewItem(subnode,this);
+            TreeViewItem item = new TreeViewItem(subnode, this);
             Items.Insert(index, item);
             index++;
         }
@@ -577,7 +569,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
             subnode.Visible = false;
             if (subnode.TreeItem == null)
             {
-                if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
             else
             {
@@ -598,7 +590,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
     public class TreeViewItem : ListBoxItem
     {
         // create item collesponding to a TreeNode
-        public TreeViewItem(TreeNode node,TreeControl treeControl)
+        public TreeViewItem(TreeNode node, TreeControl treeControl)
         {
             this.treeControl = treeControl;
             Content = StackPanel;
@@ -621,7 +613,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
             PointerPressed += TreeItem_PointerPressed;
             StackPanel.PointerPressed += TreeItem_PointerPressed;
-//            TextBlock.PointerPressed += TreeItem_PointerPressed;
+            //            TextBlock.PointerPressed += TreeItem_PointerPressed;
 
             DoubleTapped += TreeItem_DoubleTapped;
             StackPanel.DoubleTapped += TreeItem_DoubleTapped;
@@ -653,7 +645,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
         {
             if (treeNode == null) return;
 
-            if(prevFontSize != treeControl.FontSize)
+            if (prevFontSize != treeControl.FontSize)
             {
                 StackPanel.Height = treeControl.FontSize * 1.2;
                 Image.Width = treeControl.FontSize;
@@ -668,20 +660,20 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
 
             if (treeNode.Nodes.Count == 0)
             {
-                if(ToggleButton.Source != treeControl.dotIcon) ToggleButton.Source = treeControl.dotIcon;
+                if (ToggleButton.Source != treeControl.dotIcon) ToggleButton.Source = treeControl.dotIcon;
             }
             else if (treeNode.IsExpanded)
             {
-                if(ToggleButton.Source != treeControl.collaspedIcon) ToggleButton.Source = treeControl.collaspedIcon;
+                if (ToggleButton.Source != treeControl.collaspedIcon) ToggleButton.Source = treeControl.collaspedIcon;
             }
             else
             {
-                if(ToggleButton.Source != treeControl.expandedIcon) ToggleButton.Source = treeControl.expandedIcon;
+                if (ToggleButton.Source != treeControl.expandedIcon) ToggleButton.Source = treeControl.expandedIcon;
             }
 
             if (treeNode.Selected)
             {
-                if(prevSelected != true)
+                if (prevSelected != true)
                 {
                     TextBlock.Foreground = new SolidColorBrush(treeControl.SelectedForegroundColor);
                     TextBlock.Background = new SolidColorBrush(treeControl.SelectedBackgroundColor);
@@ -758,7 +750,7 @@ public partial class TreeControl : UserControl,ITreeNodeOwner
                 ToggleButton.Height = value;
                 ToggleButton.Width = value;
             }
-        }   
+        }
 
         public StackPanel StackPanel = new StackPanel()
         {
