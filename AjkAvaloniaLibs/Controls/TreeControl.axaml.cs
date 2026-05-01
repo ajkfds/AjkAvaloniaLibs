@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Threading;
 using ExCSS;
 using System;
 using System.Collections.Generic;
@@ -180,6 +181,8 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
     // call this method from all subnodes
     private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+        if (!Dispatcher.UIThread.CheckAccess() && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+
         if (e.NewItems != null)
         {
             foreach (TreeNode node in e.NewItems)
@@ -323,7 +326,17 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             TreeNode? nextTo = node.NextTo;
             if (nextTo == null)
             {
-                Items.Insert(0, new TreeViewItem(node, this));
+                if(node.Parent == null)
+                {
+                    Items.Insert(0, new TreeViewItem(node, this));
+                }
+                else
+                {
+                    // Node has lost its owner (not in parent's Nodes collection)
+                    // Remove from TreeView instead of adding at wrong position
+                    removeNode(node);
+                }
+                return;
             }
             else
             {

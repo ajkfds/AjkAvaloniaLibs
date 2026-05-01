@@ -49,7 +49,10 @@ namespace AjkAvaloniaLibs.Controls
                 }
 
                 int index = ownerNodes.IndexOf(this);
-                if (index < 0) return null;
+                if (index < 0)
+                {   // lost owener
+                    return null;
+                }
 
                 if (index == 0) // top item of owner nodes
                 {
