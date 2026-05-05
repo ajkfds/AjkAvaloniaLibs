@@ -61,7 +61,7 @@ namespace AjkAvaloniaLibs.Controls
                 }
 
                 TreeNode previousNode = ownerNodes[index - 1];
-                while (previousNode.IsExpanded)
+                if (previousNode.IsExpanded && previousNode.Nodes.Count != 0)
                 {
                     previousNode = previousNode.Nodes.Last<TreeNode>();
                 }
