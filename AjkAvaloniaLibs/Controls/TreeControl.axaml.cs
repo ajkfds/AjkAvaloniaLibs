@@ -288,6 +288,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
 
     private void addNode(TreeNode node)
     {
+        if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
         //if (Nodes.Count(x => x == node) > 1)
         //{
         //    // duplicate node
@@ -361,6 +362,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
 
     private void removeNode(TreeNode node)
     {
+        if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
         if (selectedNode == node)
         {
             selectedNode = null;
@@ -402,12 +404,14 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
 
     public void SelectNode(TreeNode node)
     {
+        if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
         nodeSlected(node);
     }
 
     // マルチ選択対応 selection handler
     public void HandleSelection(TreeNode node, KeyModifiers keyModifiers)
     {
+        if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
         if (keyModifiers.HasFlag(KeyModifiers.Control))
         {
             // Ctrl+Click: 選択反転
@@ -439,6 +443,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
 
     private void ToggleNodeSelection(TreeNode node)
     {
+        if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
         if (selectedNodes.Contains(node))
         {
             selectedNodes.Remove(node);

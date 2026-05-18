@@ -113,7 +113,8 @@ namespace AjkAvaloniaLibs.Controls
             get { return _selected; }
             set
             {
-                if (_selected == value) return;
+                if (!Dispatcher.UIThread.CheckAccess() && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+//                if (_selected == value) return;
                 _selected = value;
                 if (TreeItem != null) TreeItem.updateVisual();
                 NotifyPropertyChanged(nameof(Selected));
