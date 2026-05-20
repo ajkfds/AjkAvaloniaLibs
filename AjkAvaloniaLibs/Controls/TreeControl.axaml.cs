@@ -178,6 +178,9 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
     public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
     public ObservableCollection<TreeViewItem> Items { get; set; } = new ObservableCollection<TreeViewItem>();
 
+    // Deferred child nodes - stored when parent TreeViewItem is not yet in Items
+    private Dictionary<TreeNode, List<TreeNode>> deferredChildNodes = new Dictionary<TreeNode, List<TreeNode>>();
+
     // call this method from all subnodes
     private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
@@ -289,15 +292,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
     private void addNode(TreeNode node)
     {
         if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
-        //if (Nodes.Count(x => x == node) > 1)
-        //{
-        //    // duplicate node
 
-        //    if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-        //    return;
-        //}
-
-        //System.Diagnostics.Debug.Print("## node add visual " + node.Text);
         if (node._parent == null)
         {
             node._parent = new WeakReference<ITreeNodeOwner>(this);
@@ -305,59 +300,74 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
         node.ReportExpanded += NodeExpanded;
         node.ReportCollapsed += NodeCollapsed;
 
-        // fix visuals
+        // Calculate visibility
         if (node.Parent == null)
         {
             node.Visible = true;
         }
         else
         {
-            if (node.Parent.Visible & node.Parent.IsExpanded)
-            {
-                node.Visible = true;
-            }
-            else
-            {
-                node.Visible = false;
-            }
+            node.Visible = node.Parent.Visible && node.Parent.IsExpanded;
         }
 
-        if (node.Visible)
+        if (!node.Visible) return;
+
+        // Find position to insert
+        TreeNode? nextTo = node.NextTo;
+        if (nextTo != null)
         {
-            TreeNode? nextTo = node.NextTo;
-            if (nextTo == null)
+            TreeViewItem? nextToItem = Items.FirstOrDefault(x => x.treeNode == nextTo);
+            if (nextToItem != null)
             {
-                if(node.Parent == null)
-                {
-                    Items.Insert(0, new TreeViewItem(node, this));
-                }
-                else
-                {
-                    // Node has lost its owner (not in parent's Nodes collection)
-                    // Remove from TreeView instead of adding at wrong position
-                    removeNode(node);
-                }
+                int index = Items.IndexOf(nextToItem);
+                Items.Insert(index + 1, new TreeViewItem(node, this));
+                ProcessDeferredChildNodes(node);
                 return;
             }
-            else
-            {
-                TreeViewItem? nextToNode = Items.FirstOrDefault(x => x.treeNode == nextTo);
-                if (nextToNode == null)
-                {
-                    Items.Insert(0, new TreeViewItem(node, this));
-                }
-                else
-                {
-                    int index = Items.IndexOf(nextToNode);
-                    Items.Insert(index + 1, new TreeViewItem(node, this));
-                }
-            }
-            foreach (TreeNode subNode in node.Nodes)
-            {
-                addNode(subNode);
-            }
         }
 
+        // NextTo not found in Items - check if parent exists
+        TreeNode? parent = node.Parent;
+        if (parent != null)
+        {
+            // Check if parent's TreeViewItem exists
+            if (parent.TreeItem != null && Items.Contains(parent.TreeItem))
+            {
+                // Insert after parent
+                int parentIndex = Items.IndexOf(parent.TreeItem);
+                Items.Insert(parentIndex + 1, new TreeViewItem(node, this));
+                ProcessDeferredChildNodes(node);
+            }
+            else
+            {
+                // Parent not in Items yet - defer addition
+                if (!deferredChildNodes.ContainsKey(parent))
+                {
+                    deferredChildNodes[parent] = new List<TreeNode>();
+                }
+                deferredChildNodes[parent].Add(node);
+                // Create TreeViewItem for the node (sets node.TreeItem) but don't add to Items yet
+                new TreeViewItem(node, this);
+            }
+        }
+        else
+        {
+            // Root node with no position found - insert at top
+            Items.Insert(0, new TreeViewItem(node, this));
+            ProcessDeferredChildNodes(node);
+        }
+    }
+
+    private void ProcessDeferredChildNodes(TreeNode node)
+    {
+        if (deferredChildNodes.TryGetValue(node, out var children))
+        {
+            deferredChildNodes.Remove(node);
+            foreach (TreeNode child in children.ToList())
+            {
+                addNode(child);
+            }
+        }
     }
 
     private void removeNode(TreeNode node)
@@ -571,12 +581,28 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             TreeViewItem item = new TreeViewItem(subnode, this);
             Items.Insert(index, item);
             index++;
-        }
-        foreach (TreeNode subnode in node.Nodes)
-        {
+
+            // Process already-expanded grandchildren recursively
             if (subnode.IsExpanded)
             {
-                NodeExpanded(subnode);
+                InsertExpandedSubtree(subnode, ref index);
+            }
+        }
+    }
+
+    private void InsertExpandedSubtree(TreeNode node, ref int insertIndex)
+    {
+        foreach (TreeNode subnode in node.Nodes)
+        {
+            subnode.Visible = true;
+            subnode.Indent = node.Indent + 1;
+            TreeViewItem item = new TreeViewItem(subnode, this);
+            Items.Insert(insertIndex, item);
+            insertIndex++;
+
+            if (subnode.IsExpanded)
+            {
+                InsertExpandedSubtree(subnode, ref insertIndex);
             }
         }
     }
