@@ -352,12 +352,21 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             node.Visible = node.Parent.Visible && node.Parent.IsExpanded;
         }
 
-        if (!node.Visible) return;
+        if (!node.Visible)
+        {
+            // Node is not visible, but we still need to create TreeViewItem
+            // so that when parent expands, the node will be shown correctly
+            if (node.TreeItem == null)
+            {
+                new TreeViewItem(node, this);
+            }
+            return;
+        }
 
         // Find position to insert
         if (!node.GetNextTo(out TreeNode? nextTo))
         {
-            System.Diagnostics.Debugger.Break();
+            // NextTo calculation failed - fall back to parent-based insertion
         }
         if (nextTo != null)
         {
@@ -370,27 +379,38 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             }
         }
 
-        // NextTo not found in Items - check if parent exists
+        // NextTo not found in Items - check parent chain for valid insertion point
         TreeNode? parent = node.Parent;
-        if (parent != null)
+        while (parent != null)
         {
-            // Check if parent's TreeViewItem exists
             if (parent.TreeItem != null && Items.Contains(parent.TreeItem))
             {
-                // Insert after parent
+                // Found valid parent in Items - insert after it
                 int parentIndex = Items.IndexOf(parent.TreeItem);
                 Items.Insert(parentIndex + 1, new TreeViewItem(node, this));
+                return;
             }
-            else
-            {
-                // Create TreeViewItem for the node (sets node.TreeItem) but don't add to Items yet
-                new TreeViewItem(node, this);
-            }
+            parent = parent.Parent;
+        }
+
+        // No ancestor found in Items - this is a root node or all ancestors are collapsed
+        // Find root TreeNode to use as insertion reference
+        TreeNode? rootNode = node.Parent;
+        while (rootNode != null && rootNode.Parent != null)
+        {
+            rootNode = rootNode.Parent;
+        }
+
+        if (rootNode != null && rootNode.TreeItem != null && Items.Contains(rootNode.TreeItem))
+        {
+            // Insert after root node
+            int rootIndex = Items.IndexOf(rootNode.TreeItem);
+            Items.Insert(rootIndex + 1, new TreeViewItem(node, this));
         }
         else
         {
-            // Root node with no position found - insert at top
-            Items.Insert(0, new TreeViewItem(node, this));
+            // No valid insertion point found - create TreeViewItem anyway (for later use)
+            new TreeViewItem(node, this);
         }
     }
 
@@ -634,7 +654,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             subnode.Visible = false;
             if (subnode.TreeItem == null)
             {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                //if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
             else
             {
