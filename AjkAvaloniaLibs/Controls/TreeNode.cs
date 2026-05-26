@@ -67,16 +67,6 @@ namespace AjkAvaloniaLibs.Controls
             get { return nodes; }
             set
             {
-                // Remove old nodes from propagation tree first (but don't dispose yet)
-                // This keeps TreeItem references valid until after Reset is processed
-                if (nodes != null)
-                {
-                    foreach (TreeNode oldNode in nodes)
-                    {
-                        oldNode.RemoveFromPropagateTree();
-                    }
-                }
-
                 // Store the old collection reference before replacing
                 ObservableCollection<TreeNode>? oldNodes = nodes;
 
@@ -96,16 +86,18 @@ namespace AjkAvaloniaLibs.Controls
                 }
 
                 // Raise reset notification to update TreeControl.Items
-                // This must happen BEFORE disposing old nodes, so TreeItem references remain valid
+                // This must happen BEFORE removing from propagation tree, so PropageteCollectionChange is still valid
                 OnCollectionChanged(this,
                     new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
                         System.Collections.Specialized.NotifyCollectionChangedAction.Reset));
 
-                // Now it's safe to dispose old nodes - TreeControl has already processed the Reset
+                // Now remove old nodes from propagation tree and dispose them
+                // TreeControl has already processed the Reset, so TreeItem references are no longer needed
                 if (oldNodes != null)
                 {
                     foreach (TreeNode oldNode in oldNodes)
                     {
+                        oldNode.RemoveFromPropagateTree();
                         oldNode.Dispose();
                     }
                 }
