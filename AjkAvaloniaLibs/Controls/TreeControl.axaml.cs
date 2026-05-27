@@ -175,8 +175,20 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             item.updateVisual();
         }
     }
-    public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
+    private ObservableCollection<TreeNode> nodes = new ObservableCollection<TreeNode>();
+    public ObservableCollection<TreeNode> Nodes {
+        get { return nodes; }
+        set {
+            nodes.CollectionChanged -= Nodes_CollectionChanged;
+            nodes = value;
+            if (nodes != null)
+            {
+                nodes.CollectionChanged += Nodes_CollectionChanged;
+            }
+        }
+    }
     public ObservableCollection<TreeViewItem> Items { get; set; } = new ObservableCollection<TreeViewItem>();
+
 
     // call this method from all subnodes
     private void Nodes_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -209,7 +221,23 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
                 node.PropageteCollectionChange -= PropageteCollectionChange;
             }
         }
+
+        // Batch update all visible TreeViewItems under this TreeControl
+        BatchUpdateVisual();
+
         PropageteCollectionChange(this, e);
+    }
+
+    /// <summary>
+    /// Batch update all visible TreeViewItems under this TreeControl.
+    /// Called when collection changes occur to update all affected nodes at once.
+    /// </summary>
+    internal void BatchUpdateVisual()
+    {
+        foreach (TreeViewItem item in Items)
+        {
+            item.updateVisual();
+        }
     }
 
     private void Node_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -246,10 +274,20 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
                 if (sender is TreeNode ownerNode)
                 {
+                    // Remove all child TreeViewItems recursively, starting with direct children
+                    foreach (TreeNode childNode in new List<TreeNode>(ownerNode.Nodes))
+                    {
+                        removeNode(childNode);
+                    }
                     TreeViewItem? ownerItem = ownerNode.TreeItem;
                     if (ownerItem != null)
                     {
                         removeAllTreeItem(ownerItem);
+                    }
+                    // Add new child nodes (if any)
+                    foreach (TreeNode newNode in ownerNode.Nodes)
+                    {
+                        addNode(newNode);
                     }
                 }
                 else if (sender is TreeControl)
@@ -263,7 +301,14 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
                         }
                     }
                     Items.Clear();
+                    // Add new root nodes (if any)
+                    foreach (TreeNode newNode in Nodes)
+                    {
+                        addNode(newNode);
+                    }
                 }
+                // Batch update all visible TreeViewItems after Reset
+                BatchUpdateVisual();
                 break;
         }
     }
@@ -289,15 +334,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
     private void addNode(TreeNode node)
     {
         if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
-        //if (Nodes.Count(x => x == node) > 1)
-        //{
-        //    // duplicate node
 
-        //    if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-        //    return;
-        //}
-
-        //System.Diagnostics.Debug.Print("## node add visual " + node.Text);
         if (node._parent == null)
         {
             node._parent = new WeakReference<ITreeNodeOwner>(this);
@@ -305,60 +342,78 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
         node.ReportExpanded += NodeExpanded;
         node.ReportCollapsed += NodeCollapsed;
 
-        // fix visuals
+        // Calculate visibility
         if (node.Parent == null)
         {
             node.Visible = true;
         }
         else
         {
-            if (node.Parent.Visible & node.Parent.IsExpanded)
-            {
-                node.Visible = true;
-            }
-            else
-            {
-                node.Visible = false;
-            }
+            node.Visible = node.Parent.Visible && node.Parent.IsExpanded;
         }
 
-        if (node.Visible)
+        if (!node.Visible)
         {
-            TreeNode? nextTo = node.NextTo;
-            if (nextTo == null)
+            // Node is not visible, but we still need to create TreeViewItem
+            // so that when parent expands, the node will be shown correctly
+            if (node.TreeItem == null)
             {
-                if(node.Parent == null)
-                {
-                    Items.Insert(0, new TreeViewItem(node, this));
-                }
-                else
-                {
-                    // Node has lost its owner (not in parent's Nodes collection)
-                    // Remove from TreeView instead of adding at wrong position
-                    removeNode(node);
-                }
+                new TreeViewItem(node, this);
+            }
+            return;
+        }
+
+        // Find position to insert
+        if (!node.GetNextTo(out TreeNode? nextTo))
+        {
+            // NextTo calculation failed - fall back to parent-based insertion
+        }
+        if (nextTo != null)
+        {
+            TreeViewItem? nextToItem = Items.FirstOrDefault(x => x.treeNode == nextTo);
+            if (nextToItem != null)
+            {
+                int index = Items.IndexOf(nextToItem);
+                Items.Insert(index + 1, new TreeViewItem(node, this));
                 return;
             }
-            else
-            {
-                TreeViewItem? nextToNode = Items.FirstOrDefault(x => x.treeNode == nextTo);
-                if (nextToNode == null)
-                {
-                    Items.Insert(0, new TreeViewItem(node, this));
-                }
-                else
-                {
-                    int index = Items.IndexOf(nextToNode);
-                    Items.Insert(index + 1, new TreeViewItem(node, this));
-                }
-            }
-            foreach (TreeNode subNode in node.Nodes)
-            {
-                addNode(subNode);
-            }
         }
 
+        // NextTo not found in Items - check parent chain for valid insertion point
+        TreeNode? parent = node.Parent;
+        while (parent != null)
+        {
+            if (parent.TreeItem != null && Items.Contains(parent.TreeItem))
+            {
+                // Found valid parent in Items - insert after it
+                int parentIndex = Items.IndexOf(parent.TreeItem);
+                Items.Insert(parentIndex + 1, new TreeViewItem(node, this));
+                return;
+            }
+            parent = parent.Parent;
+        }
+
+        // No ancestor found in Items - this is a root node or all ancestors are collapsed
+        // Find root TreeNode to use as insertion reference
+        TreeNode? rootNode = node.Parent;
+        while (rootNode != null && rootNode.Parent != null)
+        {
+            rootNode = rootNode.Parent;
+        }
+
+        if (rootNode != null && rootNode.TreeItem != null && Items.Contains(rootNode.TreeItem))
+        {
+            // Insert after root node
+            int rootIndex = Items.IndexOf(rootNode.TreeItem);
+            Items.Insert(rootIndex + 1, new TreeViewItem(node, this));
+        }
+        else
+        {
+            // No valid insertion point found - create TreeViewItem anyway (for later use)
+            new TreeViewItem(node, this);
+        }
     }
+
 
     private void removeNode(TreeNode node)
     {
@@ -373,11 +428,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             removeNode(subNode);
         }
 
-        node.CollectionChanged -= Nodes_CollectionChanged;
-        node._parent = null;
-        node.PropageteCollectionChange -= PropageteCollectionChange;
-        node.ReportExpanded -= NodeExpanded;
-        node.ReportCollapsed -= NodeCollapsed;
+        node.RemoveFromPropagateTree();
 
         // fix visuals
         List<TreeViewItem> removeItems = new List<TreeViewItem>();
@@ -571,12 +622,28 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             TreeViewItem item = new TreeViewItem(subnode, this);
             Items.Insert(index, item);
             index++;
-        }
-        foreach (TreeNode subnode in node.Nodes)
-        {
+
+            // Process already-expanded grandchildren recursively
             if (subnode.IsExpanded)
             {
-                NodeExpanded(subnode);
+                InsertExpandedSubtree(subnode, ref index);
+            }
+        }
+    }
+
+    private void InsertExpandedSubtree(TreeNode node, ref int insertIndex)
+    {
+        foreach (TreeNode subnode in node.Nodes)
+        {
+            subnode.Visible = true;
+            subnode.Indent = node.Indent + 1;
+            TreeViewItem item = new TreeViewItem(subnode, this);
+            Items.Insert(insertIndex, item);
+            insertIndex++;
+
+            if (subnode.IsExpanded)
+            {
+                InsertExpandedSubtree(subnode, ref insertIndex);
             }
         }
     }
@@ -587,7 +654,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner
             subnode.Visible = false;
             if (subnode.TreeItem == null)
             {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                //if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
             else
             {

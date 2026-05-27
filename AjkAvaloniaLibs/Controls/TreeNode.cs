@@ -20,53 +20,140 @@ namespace AjkAvaloniaLibs.Controls
             Text = text;
         }
 
-        public ObservableCollection<TreeNode> Nodes { get; } = new ObservableCollection<TreeNode>();
-        internal TreeNode? NextTo
+        internal void RemoveFromPropagateTree()
         {
-            get
+            CollectionChanged = null;
+            _parent = null;
+            PropageteCollectionChange = null;
+            ReportExpanded = null;
+            ReportCollapsed = null;
+        }
+
+        /// <summary>
+        /// Disposes the TreeNode and all its child nodes.
+        /// Removes parent references, TreeItem references, and event handlers.
+        /// </summary>
+        internal void Dispose()
+        {
+            if (nodes != null)
             {
-                // get owner
-                ITreeNodeOwner? owner;
-                if (_parent == null) return null;
-                if (!_parent.TryGetTarget(out owner)) return null;
-
-                // get subnode lists which this node owner has
-                ObservableCollection<TreeNode>? ownerNodes;
-
-                TreeNode? ownerTreeNode = null;
-                if (owner is TreeNode) // this is a subnode of a treenode
+                foreach (TreeNode childNode in nodes)
                 {
-                    ownerNodes = ((TreeNode)owner).Nodes;
-                    ownerTreeNode = (TreeNode)owner;
+                    childNode.Dispose();
                 }
-                else if (owner is TreeControl) // this is root node
+            }
+            
+            parent = null;
+            TreeItem = null;
+            PropageteCollectionChange = null;
+            ReportExpanded = null;
+            ReportCollapsed = null;
+            CollectionChanged = null;
+            PropertyChanged = null;
+        }
+
+        private void UpdateIndentRecursive(TreeNode node)
+        {
+            node.Indent = Indent + 1;
+            foreach (TreeNode child in node.Nodes)
+            {
+                UpdateIndentRecursive(child);
+            }
+        }
+
+        private ObservableCollection<TreeNode> nodes = new ObservableCollection<TreeNode>();
+        public ObservableCollection<TreeNode> Nodes
+        {
+            get { return nodes; }
+            set
+            {
+                // Store the old collection reference before replacing
+                ObservableCollection<TreeNode>? oldNodes = nodes;
+
+                nodes = value;
+                if (nodes != null)
                 {
-                    ownerNodes = ((TreeControl)owner).Nodes;
+                    nodes.CollectionChanged += Nodes_CollectionChanged;
+
+                    // Re-parent existing nodes in new collection
+                    foreach (TreeNode newNode in nodes)
+                    {
+                        newNode.parent = this;
+                        newNode.PropageteCollectionChange += Nodes_CollectionChangeInform;
+                        newNode.PropertyChanged += Node_PropertyChanged;
+                        UpdateIndentRecursive(newNode);
+                    }
                 }
+
+                // Raise reset notification to update TreeControl.Items
+                // This must happen BEFORE removing from propagation tree, so PropageteCollectionChange is still valid
+                OnCollectionChanged(this,
+                    new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
+                        System.Collections.Specialized.NotifyCollectionChangedAction.Reset));
+
+                // Now remove old nodes from propagation tree and dispose them
+                // TreeControl has already processed the Reset, so TreeItem references are no longer needed
+                if (oldNodes != null)
+                {
+                    foreach (TreeNode oldNode in oldNodes)
+                    {
+                        oldNode.RemoveFromPropagateTree();
+                        oldNode.Dispose();
+                    }
+                }
+            }
+        }
+        internal bool GetNextTo(out TreeNode? nextTo)
+        {
+            nextTo = null;
+
+            // get owner
+            ITreeNodeOwner? owner;
+            if (_parent == null) return true;
+            if (!_parent.TryGetTarget(out owner)) return false;
+
+            // get subnode lists which this node owner has
+            ObservableCollection<TreeNode>? ownerNodes;
+
+            TreeNode? ownerTreeNode = null;
+            if (owner is TreeNode) // this is a subnode of a treenode
+            {
+                ownerNodes = ((TreeNode)owner).Nodes;
+                ownerTreeNode = (TreeNode)owner;
+            }
+            else if (owner is TreeControl) // this is root node
+            {
+                ownerNodes = ((TreeControl)owner).Nodes;
+            }
+            else
+            {
+                System.Diagnostics.Debugger.Break();
+                return false;
+            }
+
+            int index = ownerNodes.IndexOf(this);
+            if (index < 0)
+            {   // lost owner
+                return false;
+            }
+
+            if (index == 0) // top item of owner nodes
+            {
+                if (ownerTreeNode == null) return true;
                 else
                 {
-                    return null;
+                    nextTo = ownerTreeNode;
+                    return true;
                 }
-
-                int index = ownerNodes.IndexOf(this);
-                if (index < 0)
-                {   // lost owener
-                    return null;
-                }
-
-                if (index == 0) // top item of owner nodes
-                {
-                    if (ownerTreeNode == null) return null;
-                    else return ownerTreeNode;
-                }
-
-                TreeNode previousNode = ownerNodes[index - 1];
-                if (previousNode.IsExpanded && previousNode.Nodes.Count != 0)
-                {
-                    previousNode = previousNode.Nodes.Last<TreeNode>();
-                }
-                return previousNode;
             }
+
+            TreeNode previousNode = ownerNodes[index - 1];
+            if (previousNode.IsExpanded && previousNode.Nodes.Count != 0)
+            {
+                previousNode = previousNode.Nodes.Last<TreeNode>();
+            }
+            nextTo = previousNode;
+            return true;
         }
 
         private IImage? bitmap = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/paper.svg");
@@ -211,57 +298,58 @@ namespace AjkAvaloniaLibs.Controls
                 }
             }
 
-            //            if (Indent == -1) return;
-            /*
-            System.Diagnostics.Debug.Print("");
-            System.Diagnostics.Debug.Print("### Node_CollectionChanged : " + Text);
-            System.Diagnostics.Debug.Print("### Indent : " + Indent.ToString());
-            System.Diagnostics.Debug.Print("### Action : " + e.Action.ToString());
+            // Batch update all visible TreeViewItems under the Parent
+            BatchUpdateParentVisual();
 
-            switch (e.Action)
-            {
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
-                    if (e.OldItems != null)
-                    {
-                        foreach (TreeNode node in e.OldItems)
-                        {
-                            System.Diagnostics.Debug.Print("### OldItems : " + node.Text);
-                            //if (node.Text == "MODULE5_0 - MODULE5") System.Diagnostics.Debugger.Break();
-                            //node.parent = null;
-                            //node.Indent = -1;
-                            node.PropageteCollectionChange -= Nodes_CollectionChangeInform;
-                            node.PropertyChanged -= Node_PropertyChanged;
-                        }
-                    }
-                    if (e.NewItems != null)
-                    {
-                        foreach (TreeNode node in e.NewItems)
-                        {
-                            System.Diagnostics.Debug.Print("### NewItems : " + node.Text);
-                            //                            if (node.Text == "MODULE2_0 - MODULE2") System.Diagnostics.Debugger.Break();
-                            //                            if (node.Text == "MODULE5_0 - MODULE5") System.Diagnostics.Debugger.Break();
-                            node.parent = this;
-                            node.Indent = Indent + 1; //updateIndent();
-                            node.PropageteCollectionChange += Nodes_CollectionChangeInform;
-                            node.PropertyChanged += Node_PropertyChanged;
-                        }
-                    }
-                    break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
-                    break;
-                default:
-                    return;
-            }
-            */
             // raise upper layer
-            if (TreeItem != null) TreeItem.updateVisual();
             if (PropageteCollectionChange != null)
             {
                 PropageteCollectionChange(this, e);
             }
+        }
+
+        /// <summary>
+        /// Batch update all visible TreeViewItems under the Parent node.
+        /// Called when collection changes occur to update all affected nodes at once.
+        /// </summary>
+        private void BatchUpdateParentVisual()
+        {
+            // Get the TreeControl that owns this node's hierarchy
+            ITreeNodeOwner? owner = parent;
+            if (owner == null) return;
+
+            // Find the root TreeControl
+            TreeControl? treeControl = null;
+            if (owner is TreeControl tc)
+            {
+                treeControl = tc;
+            }
+            else if (owner is TreeNode ownerNode)
+            {
+                // Traverse up to find the TreeControl
+                ITreeNodeOwner? current = owner;
+                while (current != null)
+                {
+                    if (current is TreeControl rootTc)
+                    {
+                        treeControl = rootTc;
+                        break;
+                    }
+                    if (current is TreeNode tn)
+                    {
+                        current = tn.parent;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (treeControl == null) return;
+
+            // Batch update all TreeViewItems
+            treeControl.BatchUpdateVisual();
         }
 
         internal void UpdateIndent(TreeNode ownerNode)
