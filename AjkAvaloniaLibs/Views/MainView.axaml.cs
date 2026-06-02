@@ -1,5 +1,6 @@
 using AjkAvaloniaLibs.Controls;
 using Avalonia.Controls;
+using AjkAvaloniaLibs.Controls.TreeControls;
 
 namespace AjkAvaloniaLibs.Views;
 
@@ -22,9 +23,9 @@ public partial class MainView : UserControl
 
         // Tree1 initialize
         {
-            TreeNode node1 = new TreeNode("node1");
-            TreeNode node2 = new TreeNode("node2");
-            TreeNode node3 = new TreeNode("node3");
+            Controls.TreeControls.TreeNode node1 = new Controls.TreeControls.TreeNode("node1");
+            Controls.TreeControls.TreeNode node2 = new Controls.TreeControls.TreeNode("node2");
+            Controls.TreeControls.TreeNode node3 = new Controls.TreeControls.TreeNode("node3");
 
             Tree1.Nodes.Add(node1);
             Tree1.Nodes.Add(node2);

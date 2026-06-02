@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:AjkAvaloniaLibs.ViewModels"
              xmlns:controls="clr-namespace:AjkAvaloniaLibs.Controls;assembly=AjkAvaloniaLibs"
+             xmlns:treeControls="clr-namespace:AjkAvaloniaLibs.Controls.TreeControls;assembly=AjkAvaloniaLibs"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
              x:Class="AjkAvaloniaLibs.Views.MainView"
              x:DataType="vm:MainViewModel">
@@ -20,7 +21,7 @@
 					<Button Name="BtnRemove">remove</Button>
 					<Button Name="BtnChange">change</Button>
 				</StackPanel>
-				<controls:TreeControl Name="Tree1"/>
+				<treeControls:TreeControl Name="Tree1"/>
 			</StackPanel>
 		</TabItem>
 		<TabItem Header="ListView">

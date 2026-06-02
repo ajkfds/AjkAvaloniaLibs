@@ -33,7 +33,7 @@
     <Compile Update="Controls\ListViewControl.axaml.cs">
       <DependentUpon>ListViewControl.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Controls\TreeControl.axaml.cs">
+    <Compile Update="Controls\TreeControls\TreeControl.axaml.cs">
       <DependentUpon>TreeControl.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
