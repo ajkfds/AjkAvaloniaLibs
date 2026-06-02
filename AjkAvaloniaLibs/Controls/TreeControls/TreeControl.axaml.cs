@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Data;
 using Avalonia.Threading;
 using ExCSS;
 using System;
@@ -24,7 +25,10 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
 
         InitializeComponent();
         DataContext = this;
-        ListBox0.ItemsSource = this.Items;
+//        ListBox0.ItemsSource = this.Items;
+        ListBox0[!ListBox.ItemsSourceProperty] = new Binding(nameof(Items));
+
+
         ListBox0.Background = Background;
         updateVisual();
         Nodes.CollectionChanged += Nodes_CollectionChanged;
@@ -77,12 +81,17 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
     public Avalonia.Media.Color SelectedForegroundColor { get; set; }
     public Avalonia.Media.Color SelectedBackgroundColor { get; set; }
 
-    public void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (sender is not TreeNode treeNode) return;
-        if (treeNode.TreeItem == null) return;
 
-        treeNode.TreeItem.updateVisual();
+    event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
+    {
+        add => _propertyChanged += value;
+        remove => _propertyChanged -= value;
+    }
+    private PropertyChangedEventHandler? _propertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        _propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     // Root Node -----------------------------------
@@ -300,21 +309,21 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
         }
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    public ObservableCollection<TreeControlViewItem> _items = new ObservableCollection<TreeControlViewItem>();
 
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    public ObservableCollection<TreeControlViewItem> Items
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-    public ObservableCollection<TreeControlViewItem> _items { get; set; } = new ObservableCollection<TreeControlViewItem>();
-    public ObservableCollection<TreeControlViewItem> Items { 
-        get { return _items; } 
-        set {
+        get
+        {
+            return _items;
+        }
+        set
+        {
             _items = value;
             OnPropertyChanged();
-        } 
+        }
     }
-        
+
 
     private void updateAllTreeViewItems()
     {
@@ -326,6 +335,12 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
         updateSubTreeViewItems(items, this);
 
         items.Add(new TreeControlViewItem(this)); // add blank
+
+        //Items.Clear();
+        //foreach (var item in items)
+        //{
+        //    Items.Add(item);
+        //}
         Items = items;
     }
 
@@ -333,6 +348,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
     {
         foreach(TreeNode treeNode in owner.Nodes)
         {
+            treeNode.treeControl = this;
             treeNode.parent = owner;
             TreeControlViewItem item = new TreeControlViewItem(treeNode, this);
             items.Add(item);
