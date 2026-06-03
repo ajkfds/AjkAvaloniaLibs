@@ -24,10 +24,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
         SelectedForegroundColor = Avalonia.Media.Colors.LightGray;
 
         InitializeComponent();
-        DataContext = this;
-//        ListBox0.ItemsSource = this.Items;
-        ListBox0[!ListBox.ItemsSourceProperty] = new Binding(nameof(Items));
-
+        ListBox0[!ListBox.ItemsSourceProperty] = new Binding(nameof(Items)) { Source = this };
 
         ListBox0.Background = Background;
         updateVisual();
@@ -125,81 +122,17 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
     {
         updateAllTreeViewItems();
         updateVisual();
-        return;
-        if (!Dispatcher.UIThread.CheckAccess() && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-
-        if (e.NewItems != null)
-        {
-            foreach (TreeNode node in e.NewItems)
-            {
-                if (node.Nodes.Count > 0)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-                node.parent = this;
-                node.Indent = 0;
-                node.UpdateIndent(node);
-            }
-        }
-        if (e.OldItems != null)
-        {
-            foreach (TreeNode node in e.OldItems)
-            {
-                node.parent = null;
-                node.Indent = 0;
-                node.UpdateIndent(node);
-            }
-        }
     }
 
     internal void NodeExpanded(TreeNode node)
     {
         updateAllTreeViewItems();
         updateVisual();
-        return;
-
-        TreeControlViewItem? rootItem = node.TreeItem;
-        if (rootItem == null) throw new Exception("TreeItem is null");
-
-        int index = Items.IndexOf(rootItem) + 1;
-        foreach (TreeNode subnode in node.Nodes)
-        {
-            subnode.Visible = true;
-            subnode.Indent = node.Indent + 1;
-            TreeControlViewItem item = new TreeControlViewItem(subnode, this);
-            Items.Insert(index, item);
-            index++;
-
-            // Process already-expanded grandchildren recursively
-            if (subnode.IsExpanded)
-            {
-                InsertExpandedSubtree(subnode, ref index);
-            }
-        }
     }
     internal void NodeCollapsed(TreeNode node)
     {
         updateAllTreeViewItems();
         updateVisual();
-        return;
-        foreach (TreeNode subnode in node.Nodes)
-        {
-            subnode.Visible = false;
-            if (subnode.TreeItem == null)
-            {
-                //if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-            }
-            else
-            {
-                Items.Remove(subnode.TreeItem);
-                subnode.TreeItem = null;
-            }
-        }
-        foreach (TreeNode subnode in node.Nodes)
-        {
-            if (!subnode.IsExpanded) continue;
-            NodeCollapsed(subnode);
-        }
     }
 
 
@@ -215,7 +148,7 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
     internal void OnKeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
     {
         if (selectedNode == null) return;
-        TreeControlViewItem? treeItem = selectedNode.TreeItem;
+        TreeControlViewItem? treeItem = selectedNode.TreeControlViewItem;
         if (treeItem == null) return;
 
         if (e.Key == Avalonia.Input.Key.Up)
@@ -309,21 +242,20 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
         }
     }
 
-    public ObservableCollection<TreeControlViewItem> _items = new ObservableCollection<TreeControlViewItem>();
+    private ObservableCollection<TreeControlViewItem> _items = new();
+
+    // Avaloniaにプロパティを登録する
+    public static readonly DirectProperty<TreeControl, ObservableCollection<TreeControlViewItem>> ItemsProperty =
+        AvaloniaProperty.RegisterDirect<TreeControl, ObservableCollection<TreeControlViewItem>>(
+            nameof(Items),
+            o => o.Items,
+            (o, v) => o.Items = v);
 
     public ObservableCollection<TreeControlViewItem> Items
     {
-        get
-        {
-            return _items;
-        }
-        set
-        {
-            _items = value;
-            OnPropertyChanged();
-        }
+        get => _items;
+        set => SetAndRaise(ItemsProperty, ref _items, value);
     }
-
 
     private void updateAllTreeViewItems()
     {
@@ -331,257 +263,155 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
         {
             if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
         }
-        ObservableCollection<TreeControlViewItem> items = new ObservableCollection<TreeControlViewItem>();
-        updateSubTreeViewItems(items, this);
 
-        items.Add(new TreeControlViewItem(this)); // add blank
-
-        //Items.Clear();
-        //foreach (var item in items)
-        //{
-        //    Items.Add(item);
-        //}
-        Items = items;
-    }
-
-    private void updateSubTreeViewItems(ObservableCollection<TreeControlViewItem> items,ITreeNodeOwner owner)
-    {
-        foreach(TreeNode treeNode in owner.Nodes)
+        // 1. 既存のアイテムを辞書にキャッシュ（TreeNode または ブランク用の this をキーにする）
+        // インスタンスを使い回すことで、ポインターイベントの消失を防ぎます
+        var existingItemsMap = new Dictionary<object, TreeControlViewItem>();
+        foreach (var oldItem in Items)
         {
-            treeNode.treeControl = this;
-            treeNode.parent = owner;
-            TreeControlViewItem item = new TreeControlViewItem(treeNode, this);
-            items.Add(item);
-            if (treeNode.IsExpanded)
+            if (oldItem.treeNode != null)
             {
-                updateSubTreeViewItems(items, treeNode);
+                existingItemsMap[oldItem.treeNode] = oldItem;
+                oldItem.treeNode.Visible = false;
             }
+            else
+            {
+                // treeNodeがnullのものは末尾のブランクアイテムとみなす
+                existingItemsMap[this] = oldItem;
+            }
+        }
+
+        // 2. 本来表示されるべき「最新の正しい並び順」のリストを構築する（既存インスタンスは再利用）
+        List<TreeControlViewItem> expectedItems = new List<TreeControlViewItem>();
+        updateSubTreeViewItemsIncremental(expectedItems, this, existingItemsMap);
+
+        // 末尾のブランクアイテムの追加・再利用
+        if (existingItemsMap.TryGetValue(this, out var blankItem))
+        {
+            expectedItems.Add(blankItem);
+        }
+        else
+        {
+            expectedItems.Add(new TreeControlViewItem(this)); // add blank to keep scroll margin
+        }
+
+        // 高速判定用のハッシュセットを作成
+        var expectedSet = new HashSet<TreeControlViewItem>(expectedItems);
+
+        // 3. 既存の Items コレクションを expectedItems と完全に一致するように差分更新する
+        int currentIdx = 0;
+        int expectedIdx = 0;
+
+        while (expectedIdx < expectedItems.Count)
+        {
+            var expectedItem = expectedItems[expectedIdx];
+
+            if (currentIdx < Items.Count)
+            {
+                var currentItem = Items[currentIdx];
+
+                if (currentItem == expectedItem)
+                {
+                    // インスタンスが一致していればそのまま進む
+                    currentIdx++;
+                    expectedIdx++;
+                }
+                else
+                {
+                    // 不一致の場合、現在の要素が「新しいリスト」に生き残っているか確認
+                    if (!expectedSet.Contains(currentItem))
+                    {
+                        // 新しいリストに残っていない ＝ 完全に削除された要素なので Remove
+                        Items.RemoveAt(currentIdx);
+                        // 削除されると次の要素が currentIdx に詰まるため、インデックスは進めない
+                    }
+                    else
+                    {
+                        // 新しいリストのどこか後ろに登場する ＝ ここに期待される要素を挿入
+                        Items.Insert(currentIdx, expectedItem);
+                        currentIdx++;
+                        expectedIdx++;
+                    }
+                }
+            }
+            else
+            {
+                // 既存の Items が尽きたら、残りの期待されるアイテムを末尾に追加
+                Items.Add(expectedItem);
+                currentIdx++;
+                expectedIdx++;
+            }
+        }
+
+        // 4. 既存の Items の方に余分な古い要素が残っていれば末尾から削除
+        while (Items.Count > expectedItems.Count)
+        {
+            Items.RemoveAt(Items.Count - 1);
         }
     }
 
-    // call this method from all subnodes
+    // 差分更新用にインスタンスのキャッシュを受け取る再帰メソッド
+    private void updateSubTreeViewItemsIncremental(
+        List<TreeControlViewItem> expectedItems,
+        ITreeNodeOwner owner,
+        Dictionary<object, TreeControlViewItem> cache)
+    {
+        foreach (TreeNode treeNode in owner.Nodes)
+        {
+            treeNode.treeControl = this;
+            treeNode.parent = owner;
+            treeNode.Visible = true;
+            treeNode.UpdateIndent(owner);
 
-    /// <summary>
-    /// Batch update all visible TreeControlViewItems under this TreeControl.
-    /// Called when collection changes occur to update all affected nodes at once.
-    /// </summary>
-    //internal void BatchUpdateVisual()
+            // 既存のインスタンスがあれば再利用し、なければ新規作成する
+            if (!cache.TryGetValue(treeNode, out var item))
+            {
+                item = new TreeControlViewItem(treeNode, this);
+            }
+            expectedItems.Add(item);
+
+            if (treeNode.IsExpanded)
+            {
+                updateSubTreeViewItemsIncremental(expectedItems, treeNode, cache);
+            }
+        }
+    }
+    //private void updateAllTreeViewItems()
     //{
-    //    foreach (TreeControlViewItem item in Items)
+    //    if (!Dispatcher.UIThread.CheckAccess())
     //    {
-    //        item.updateVisual();
+    //        if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+    //    }
+    //    foreach(var oldItem in Items)
+    //    {
+    //        if (oldItem.treeNode != null) oldItem.treeNode.Visible = false;
+    //    }
+
+    //    ObservableCollection<TreeControlViewItem> items = new ObservableCollection<TreeControlViewItem>();
+    //    updateSubTreeViewItems(items, this);
+
+    //    items.Add(new TreeControlViewItem(this)); // add blank to keep scroll margin
+    //    Items = items;
+    //}
+
+    //private void updateSubTreeViewItems(ObservableCollection<TreeControlViewItem> items,ITreeNodeOwner owner)
+    //{
+    //    foreach(TreeNode treeNode in owner.Nodes)
+    //    {
+    //        treeNode.treeControl = this;
+    //        treeNode.parent = owner;
+    //        treeNode.Visible = true;
+
+    //        TreeControlViewItem? item = new TreeControlViewItem(treeNode, this);
+    //        items.Add(item);
+
+    //        if (treeNode.IsExpanded)
+    //        {
+    //            updateSubTreeViewItems(items, treeNode);
+    //        }
     //    }
     //}
 
-    //private void PropageteCollectionChange(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-    //{
-    //    // Update TreeItems
-    //    switch (e.Action)
-    //    {
-    //        case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-    //        case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
-    //        case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
-    //        case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
-    //            if (e.OldItems != null)
-    //            {
-    //                foreach (TreeNode node in e.OldItems)
-    //                {
-    //                    removeNode(node);
-    //                }
-    //            }
-    //            if (e.NewItems != null)
-    //            {
-    //                foreach (TreeNode node in e.NewItems)
-    //                {
-    //                    addNode(node);
-    //                }
-    //            }
-    //            break;
-    //        case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
-    //            if (sender is TreeNode ownerNode)
-    //            {
-    //                // Remove all child TreeControlViewItems recursively, starting with direct children
-    //                foreach (TreeNode childNode in new List<TreeNode>(ownerNode.Nodes))
-    //                {
-    //                    removeNode(childNode);
-    //                }
-    //                TreeControlViewItem? ownerItem = ownerNode.TreeItem;
-    //                if (ownerItem != null)
-    //                {
-    //                    removeAllTreeItem(ownerItem);
-    //                }
-    //                // Add new child nodes (if any)
-    //                foreach (TreeNode newNode in ownerNode.Nodes)
-    //                {
-    //                    addNode(newNode);
-    //                }
-    //            }
-    //            else if (sender is TreeControl)
-    //            {
-    //                foreach (TreeControlViewItem item in Items)
-    //                {
-    //                    TreeNode? node = item.treeNode;
-    //                    if (node != null)
-    //                    {
-    //                        removeNode(node);
-    //                    }
-    //                }
-    //                Items.Clear();
-    //                // Add new root nodes (if any)
-    //                foreach (TreeNode newNode in Nodes)
-    //                {
-    //                    addNode(newNode);
-    //                }
-    //            }
-    //            // Batch update all visible TreeControlViewItems after Reset
-    //            BatchUpdateVisual();
-    //            break;
-    //    }
-    //}
-
-    //private void removeAllTreeItem(TreeControlViewItem item)
-    //{
-    //    int index = Items.IndexOf(item) + 1;
-    //    while (index < Items.Count)
-    //    {
-    //        TreeNode? treeNode = Items[index].treeNode;
-    //        if (treeNode != null && treeNode.parent == item.treeNode)
-    //        {
-    //            removeAllTreeItem(Items[index]);
-    //        }
-    //        else
-    //        {
-    //            break;
-    //        }
-    //    }
-    //    Items.Remove(item);
-    //}
-
-    //private void addNode(TreeNode node)
-    //{
-    //    if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
-
-    //    if (node._parent == null)
-    //    {
-    //        node._parent = new WeakReference<ITreeNodeOwner>(this);
-    //    }
-    //    node.treeControl = this;
-
-    //    // Calculate visibility
-    //    if (node.Parent == null)
-    //    {
-    //        node.Visible = true;
-    //    }
-    //    else
-    //    {
-    //        node.Visible = node.Parent.Visible && node.Parent.IsExpanded;
-    //    }
-
-    //    if (!node.Visible)
-    //    {
-    //        // Node is not visible, but we still need to create TreeControlViewItem
-    //        // so that when parent expands, the node will be shown correctly
-    //        if (node.TreeItem == null)
-    //        {
-    //            new TreeControlViewItem(node, this);
-    //        }
-    //        return;
-    //    }
-
-    //    // Find position to insert
-    //    if (!node.GetNextTo(out TreeNode? nextTo))
-    //    {
-    //        // NextTo calculation failed - fall back to parent-based insertion
-    //    }
-    //    if (nextTo != null)
-    //    {
-    //        TreeControlViewItem? nextToItem = Items.FirstOrDefault(x => x.treeNode == nextTo);
-    //        if (nextToItem != null)
-    //        {
-    //            int index = Items.IndexOf(nextToItem);
-    //            Items.Insert(index + 1, new TreeControlViewItem(node, this));
-    //            return;
-    //        }
-    //    }
-
-    //    // NextTo not found in Items - check parent chain for valid insertion point
-    //    ITreeNodeOwner? parent = node.Parent;
-    //    while (parent is TreeNode)
-    //    {
-    //        TreeNode parentNode = (TreeNode)parent;
-
-    //        if (parentNode.TreeItem != null && Items.Contains(parentNode.TreeItem))
-    //        {
-    //            // Found valid parent in Items - insert after it
-    //            int parentIndex = Items.IndexOf(parentNode.TreeItem);
-    //            Items.Insert(parentIndex + 1, new TreeControlViewItem(node, this));
-    //            return;
-    //        }
-    //        parent = parentNode.Parent;
-    //    }
-
-    //    // No ancestor found in Items - this is a root node or all ancestors are collapsed
-    //    // Find root TreeNode to use as insertion reference
-    //    //ITreeNodeOwner? treeNodeOwner = node.parent;
-    //    //while (treeNodeOwner != null && treeNodeOwner.Parent != null)
-    //    //{
-    //    //    treeNodeOwner = treeNodeOwner.Parent;
-    //    //}
-    //    //if (treeNodeOwner is TreeNode rootNode)
-    //    //{
-
-    //    //}
-
-
-    //    //if (rootNode != null && rootNode.TreeItem != null && Items.Contains(rootNode.TreeItem))
-    //    //{
-    //    //    // Insert after root node
-    //    //    int rootIndex = Items.IndexOf(rootNode.TreeItem);
-    //    //    Items.Insert(rootIndex + 1, new TreeControlViewItem(node, this));
-    //    //}
-    //    //else
-    //    //{
-    //    //    // No valid insertion point found - create TreeControlViewItem anyway (for later use)
-    //    //    new TreeControlViewItem(node, this);
-    //    //}
-    //}
-
-
-    //private void removeNode(TreeNode node)
-    //{
-    //    if (System.Diagnostics.Debugger.IsAttached & !Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
-    //    if (selectedNode == node)
-    //    {
-    //        selectedNode = null;
-    //    }
-
-    //    foreach (TreeNode subNode in node.Nodes)
-    //    {
-    //        removeNode(subNode);
-    //    }
-
-    //    // fix visuals
-    //    List<TreeControlViewItem> removeItems = new List<TreeControlViewItem>();
-    //    foreach (TreeControlViewItem? item in Items)
-    //    {
-    //        if (item.treeNode == node)
-    //        {
-    //            removeItems.Add(item);
-    //        }
-    //    }
-
-    //    foreach (TreeControlViewItem removeItem in removeItems)
-    //    {
-    //        Items.Remove(removeItem);
-    //    }
-    //    node.TreeItem = null;
-
-    //    //if (node.TreeItem != null)
-    //    //{
-    //    //    Items.Remove(node.TreeItem);
-    //    //    node.TreeItem = null;
-    //    //}
-    //}
 
     public void SelectNode(TreeNode node)
     {
@@ -609,14 +439,14 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
             else
             {
                 // 最初の場合は通常の単一選択
-                ClearSelection();
+//                ClearSelection();
                 AddSingleSelection(node);
             }
         }
         else
         {
             // 通常クリック: 選択解除して選択
-            ClearSelection();
+//            ClearSelection();
             AddSingleSelection(node);
             lastSelectedNodeForShift = node;
         }
@@ -692,18 +522,24 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
         UpdatePrimarySelection(endNode);
     }
 
-    private void ClearSelection()
-    {
-        foreach (var node in selectedNodes.ToList())
-        {
-            node.Selected = false;
-            node.OnDeSelected();
-        }
-        selectedNodes.Clear();
-    }
+    //private void ClearSelection()
+    //{
+    //    foreach (var node in selectedNodes.ToList())
+    //    {
+    //        node.Selected = false;
+    //        node.OnDeSelected();
+    //    }
+    //    selectedNodes.Clear();
+    //}
 
     private void AddSingleSelection(TreeNode node)
     {
+        foreach (var oldnode in selectedNodes.ToList())
+        {
+            if (oldnode == node) continue;
+            oldnode.Selected = false;
+            oldnode.OnDeSelected();
+        }
         selectedNodes.Clear();
         selectedNodes.Add(node);
         selectedNode = node;
@@ -739,24 +575,5 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
     {
         return selectedNodes;
     }
-
-    private void InsertExpandedSubtree(TreeNode node, ref int insertIndex)
-    {
-        foreach (TreeNode subnode in node.Nodes)
-        {
-            subnode.Visible = true;
-            subnode.Indent = node.Indent + 1;
-            TreeControlViewItem item = new TreeControlViewItem(subnode, this);
-            Items.Insert(insertIndex, item);
-            insertIndex++;
-
-            if (subnode.IsExpanded)
-            {
-                InsertExpandedSubtree(subnode, ref insertIndex);
-            }
-        }
-    }
-
-
 
 }

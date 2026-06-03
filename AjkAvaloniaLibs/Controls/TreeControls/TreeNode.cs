@@ -58,68 +58,67 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
             get { return nodes; }
             set
             {
-//                nodes.CollectionChanged -= Nodes_CollectionChanged;
-                if (treeControl != null)
+                nodes = value;
+                if (treeControl != null && parent != null && parent.Visible)
                 {
                     treeControl.AllNodesChanged(this);
                 }
-                nodes = value;
                 nodes.CollectionChanged += Nodes_CollectionChanged;
             }
         }
 
-        internal bool GetNextTo(out TreeNode? nextTo)
-        {
-            nextTo = null;
+        //internal bool GetNextTo(out TreeNode? nextTo)
+        //{
+        //    nextTo = null;
 
-            // get owner
-            ITreeNodeOwner? owner;
-            if (_parent == null) return true;
-            if (!_parent.TryGetTarget(out owner)) return false;
+        //    // get owner
+        //    ITreeNodeOwner? owner;
+        //    if (_parent == null) return true;
+        //    if (!_parent.TryGetTarget(out owner)) return false;
 
-            // get subnode lists which this node owner has
-            ObservableCollection<TreeNode>? ownerNodes;
+        //    // get subnode lists which this node owner has
+        //    ObservableCollection<TreeNode>? ownerNodes;
 
-            TreeNode? ownerTreeNode = null;
-            if (owner is TreeNode) // this is a subnode of a treenode
-            {
-                ownerNodes = ((TreeNode)owner).Nodes;
-                ownerTreeNode = (TreeNode)owner;
-            }
-            else if (owner is TreeControl) // this is root node
-            {
-                ownerNodes = ((TreeControl)owner).Nodes;
-            }
-            else
-            {
-                System.Diagnostics.Debugger.Break();
-                return false;
-            }
+        //    TreeNode? ownerTreeNode = null;
+        //    if (owner is TreeNode) // this is a subnode of a treenode
+        //    {
+        //        ownerNodes = ((TreeNode)owner).Nodes;
+        //        ownerTreeNode = (TreeNode)owner;
+        //    }
+        //    else if (owner is TreeControl) // this is root node
+        //    {
+        //        ownerNodes = ((TreeControl)owner).Nodes;
+        //    }
+        //    else
+        //    {
+        //        System.Diagnostics.Debugger.Break();
+        //        return false;
+        //    }
 
-            int index = ownerNodes.IndexOf(this);
-            if (index < 0)
-            {   // lost owner
-                return false;
-            }
+        //    int index = ownerNodes.IndexOf(this);
+        //    if (index < 0)
+        //    {   // lost owner
+        //        return false;
+        //    }
 
-            if (index == 0) // top item of owner nodes
-            {
-                if (ownerTreeNode == null) return true;
-                else
-                {
-                    nextTo = ownerTreeNode;
-                    return true;
-                }
-            }
+        //    if (index == 0) // top item of owner nodes
+        //    {
+        //        if (ownerTreeNode == null) return true;
+        //        else
+        //        {
+        //            nextTo = ownerTreeNode;
+        //            return true;
+        //        }
+        //    }
 
-            TreeNode previousNode = ownerNodes[index - 1];
-            if (previousNode.IsExpanded && previousNode.Nodes.Count != 0)
-            {
-                previousNode = previousNode.Nodes.Last<TreeNode>();
-            }
-            nextTo = previousNode;
-            return true;
-        }
+        //    TreeNode previousNode = ownerNodes[index - 1];
+        //    if (previousNode.IsExpanded && previousNode.Nodes.Count != 0)
+        //    {
+        //        previousNode = previousNode.Nodes.Last<TreeNode>();
+        //    }
+        //    nextTo = previousNode;
+        //    return true;
+        //}
 
         private IImage? bitmap = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("AjkAvaloniaLibs/Assets/Icons/paper.svg");
         public IImage? Image
@@ -131,7 +130,7 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
             set
             {
                 bitmap = value;
-                if (TreeItem != null) TreeItem.updateVisual();
+                if (TreeControlViewItem != null) TreeControlViewItem.updateVisual();
             }
         }
 
@@ -165,7 +164,7 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
             {
                 if (!Dispatcher.UIThread.CheckAccess() && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 _selected = value;
-                if (TreeItem != null) TreeItem.updateVisual();
+                if (TreeControlViewItem != null) TreeControlViewItem.updateVisual();
             }
         }
 
@@ -202,14 +201,14 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
         }
 
 
-        internal System.WeakReference<TreeControlViewItem>? _treeItem = null;
-        internal TreeControlViewItem? TreeItem
+        internal System.WeakReference<TreeControlViewItem>? _treeControlViewItem = null;
+        internal TreeControlViewItem? TreeControlViewItem
         {
             get
             {
                 TreeControlViewItem? ret;
-                if (_treeItem == null) return null;
-                if (!_treeItem.TryGetTarget(out ret)) return null;
+                if (_treeControlViewItem == null) return null;
+                if (!_treeControlViewItem.TryGetTarget(out ret)) return null;
                 return ret as TreeControlViewItem;
             }
             set
@@ -217,11 +216,11 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
 
                 if (value == null)
                 {
-                    _treeItem = null;
+                    _treeControlViewItem = null;
                 }
                 else
                 {
-                    _treeItem = new WeakReference<TreeControlViewItem>(value);
+                    _treeControlViewItem = new WeakReference<TreeControlViewItem>(value);
                 }
             }
         }
@@ -234,7 +233,7 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
 
-            if (treeControl != null) treeControl.Nodes_CollectionChanged(this, e);
+            if (treeControl != null && Visible) treeControl.Nodes_CollectionChanged(this, e);
         }
 
  

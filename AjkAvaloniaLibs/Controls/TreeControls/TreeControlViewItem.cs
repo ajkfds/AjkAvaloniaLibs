@@ -48,7 +48,7 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
             StackPanel.DoubleTapped += TreeItem_DoubleTapped;
             TextBlock.DoubleTapped += TreeItem_DoubleTapped;
 
-            node.TreeItem = this;
+            node.TreeControlViewItem = this;
             updateVisual();
         }
 
@@ -66,7 +66,6 @@ namespace AjkAvaloniaLibs.Controls.TreeControls
 
             StackPanel.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
         }
-
 
 
         double? prevFontSize = null;
