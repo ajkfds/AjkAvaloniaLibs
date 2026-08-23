@@ -251,64 +251,75 @@ namespace AjkAvaloniaLibs.Libs
 
         private static SKBitmap getSkBitmapFromSvg(string SvgPath, float scaleX, float scaleY)
         {
-            // get .svg assets as a string
-            string svgString;
+            // 引数なしコンストラクタを持つ SKSvg を直接利用する
+            var svg = new SKSvg();
+
             using (var stream = AssetLoader.Open(new Uri("avares://" + SvgPath)))
             {
-                byte[] buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, (int)stream.Length);
-                var encoding = Encoding.GetEncoding("UTF-8");
-                svgString = encoding.GetString(buffer);
+                svg.Load(stream);
             }
 
-            Avalonia.Svg.Skia.Svg svg = new Avalonia.Svg.Skia.Svg(new Uri("avares://" + SvgPath));
-            svg.Source = svgString;
-            if (svg.Picture == null) throw new Exception();
+            if (svg.Picture == null)
+                throw new Exception($"Failed to load SVG from path: {SvgPath}");
 
-            SKBitmap? skBitmap = svg.Picture.ToBitmap(SKColors.Transparent, scaleX, scaleY, SKColorType.Bgra8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb());
-            if (skBitmap == null) throw new Exception();
+            SKBitmap? skBitmap = svg.Picture.ToBitmap(
+                SKColors.Transparent,
+                scaleX,
+                scaleY,
+                SKColorType.Bgra8888,
+                SKAlphaType.Premul,
+                SKColorSpace.CreateSrgb()
+            );
+
+            if (skBitmap == null)
+                throw new Exception("Failed to convert SVG picture to SKBitmap.");
 
             return skBitmap;
         }
         private static SKBitmap getSkBitmapFromSvg(string SvgPath, float scaleX, float scaleY, Avalonia.Media.Color color)
         {
-            // get .svg assets as a string
-            string svgString;
+            // 1. SVGのロード
+            var svg = new SKSvg();
             using (var stream = AssetLoader.Open(new Uri("avares://" + SvgPath)))
             {
-                byte[] buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, (int)stream.Length);
-                var encoding = Encoding.GetEncoding("UTF-8");
-                svgString = encoding.GetString(buffer);
+                svg.Load(stream);
             }
 
-            Avalonia.Svg.Skia.Svg svg = new Avalonia.Svg.Skia.Svg(new Uri("avares://" + SvgPath));
-            svg.Source = svgString;
-            if (svg.Picture == null) throw new Exception();
+            if (svg.Picture == null)
+                throw new Exception($"Failed to load SVG from path: {SvgPath}");
 
-            SKBitmap? skBitmap = svg.Picture.ToBitmap(SKColors.Transparent, scaleX, scaleY, SKColorType.Bgra8888, SKAlphaType.Premul, SKColorSpace.CreateSrgb());
-            if (skBitmap == null) throw new Exception();
+            // 2. 拡大率を反映した描画サイズを取得
+            var width = (int)Math.Ceiling(svg.Picture.CullRect.Width * scaleX);
+            var height = (int)Math.Ceiling(svg.Picture.CullRect.Height * scaleY);
 
-            //            var pixelSize = new PixelSize((int)skBitmap.Width, (int)skBitmap.Height);
-            //            var dpi = new Vector(96, 96);
+            if (width <= 0 || height <= 0)
+                throw new Exception("Invalid SVG bounds.");
 
-            using SKCanvas canvas = new SKCanvas(skBitmap);
+            // 3. 描画先となるビットマップを生成
+            var skBitmap = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
 
-            //            using var colorizedRenderTarget = new RenderTargetBitmap(pixelSize, dpi);
-            //            using var colorizedContextImpl = colorizedRenderTarget.CreateDrawingContext();
-            //            using var colorizedSkiaContext = colorizedContextImpl;
-
-            using var paint = new SKPaint
+            using (var canvas = new SKCanvas(skBitmap))
             {
-                ColorFilter = SKColorFilter.CreateBlendMode(
-                    color.ToSKColor(),
-                    SKBlendMode.SrcIn)
-            };
+                canvas.Clear(SKColors.Transparent);
 
-            canvas?.DrawBitmap(skBitmap, 0, 0, paint);
+                // 4. 指定色に変更するためのカラーフィルタを設定
+                using var paint = new SKPaint
+                {
+                    IsAntialias = true,
+                    ColorFilter = SKColorFilter.CreateBlendMode(
+                        color.ToSKColor(),
+                        SKBlendMode.SrcIn
+                    )
+                };
+
+                // 5. スケール変換行列を作成して SVG Picture をキャンバスに直接描画
+                var matrix = SKMatrix.CreateScale(scaleX, scaleY);
+                canvas.DrawPicture(svg.Picture, ref matrix, paint);
+            }
 
             return skBitmap;
         }
+
 
     }
 }
