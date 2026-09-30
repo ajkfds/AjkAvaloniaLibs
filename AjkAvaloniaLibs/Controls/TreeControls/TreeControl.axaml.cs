@@ -554,15 +554,12 @@ public partial class TreeControl : UserControl, ITreeNodeOwner, INotifyPropertyC
 
     private void nodeSlected(TreeNode node)
     {
-        if (selectedNode == node) return;
-        if (selectedNode != null)
-        {
-            selectedNode.Selected = false;
-            selectedNode.OnDeSelected();
-        }
-        selectedNode = node;
-        selectedNode.Selected = true;
-        selectedNode.OnSelected();
+        // nodeSlected (SelectNode / keyboard) と AddSingleSelection (click) の
+        // 選択解除対象が selectedNode / selectedNodes で食い違い、
+        // 片方の経路で選択したノードがハイライト残留する問題を防ぐため
+        // nodeSlected 側も selectedNodes を解除する AddSingleSelection に統一する
+        if (selectedNode == node && selectedNodes.Contains(node) && selectedNodes.Count == 1) return;
+        AddSingleSelection(node);
     }
     private TreeNode? selectedNode { get; set; } = null;
 
