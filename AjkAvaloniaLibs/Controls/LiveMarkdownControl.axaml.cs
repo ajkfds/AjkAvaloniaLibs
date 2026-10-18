@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using LiveMarkdown.Avalonia;
 
 namespace AjkAvaloniaLibs.Controls;
 
@@ -22,8 +23,8 @@ public partial class LiveMarkdownControl : UserControl
         //    ];
 
         // add markdown renderer (need .net 10)
-//        LiveMarkdown.Avalonia.MarkdownRenderer.ConfigurePipeline += x => x.UseMermaid();
-//        LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.MermaidBlockNode>();
+        LiveMarkdown.Avalonia.MarkdownRenderer.ConfigurePipeline += x => x.UseMermaid();
+        LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.MermaidBlockNode>();
 
         Content = border;
         border.CornerRadius= new CornerRadius(5);

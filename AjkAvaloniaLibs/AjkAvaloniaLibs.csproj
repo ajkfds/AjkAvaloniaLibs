@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -20,6 +20,7 @@
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
     <PackageReference Include="LiveMarkdown.Avalonia" Version="2.4.3" />
     <PackageReference Include="LiveMarkdown.Avalonia.Math" Version="2.4.3" />
+    <PackageReference Include="LiveMarkdown.Avalonia.Mermaid" Version="2.4.3" />
     <PackageReference Include="Microsoft.Playwright" Version="1.63.0" />
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="18.7.23" />
     <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.17" />
