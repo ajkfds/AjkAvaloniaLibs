@@ -27,6 +27,8 @@ public partial class LiveMarkdownControl : UserControl
         LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.MermaidBlockNode>();
         LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.WaveDromBlockNode>();
 
+//        LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.DrawIoBlockNode>();
+
         Content = border;
         border.CornerRadius= new CornerRadius(5);
         border.BorderThickness = new Thickness(2);

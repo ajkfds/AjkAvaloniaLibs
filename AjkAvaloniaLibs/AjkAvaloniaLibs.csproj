@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LiveMarkdown.Avalonia.DrawIo\LiveMarkdown.Avalonia.DrawIo.csproj" />
     <ProjectReference Include="..\LiveMarkdown.Avalonia.WaveDrom\LiveMarkdown.Avalonia.WaveDrom.csproj" />
   </ItemGroup>
 
