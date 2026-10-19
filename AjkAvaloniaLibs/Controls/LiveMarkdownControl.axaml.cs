@@ -23,8 +23,9 @@ public partial class LiveMarkdownControl : UserControl
         //    ];
 
         // add markdown renderer (need .net 10)
-        LiveMarkdown.Avalonia.MarkdownRenderer.ConfigurePipeline += x => x.UseMermaid();
+        LiveMarkdown.Avalonia.MarkdownRenderer.ConfigurePipeline += x => x.UseMermaid().UseWaveDrom();
         LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.MermaidBlockNode>();
+        LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.WaveDromBlockNode>();
 
         Content = border;
         border.CornerRadius= new CornerRadius(5);
