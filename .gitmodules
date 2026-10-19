@@ -1,0 +1,3 @@
+[submodule "LiveMarkdown.Avalonia.WaveDrom"]
+	path = LiveMarkdown.Avalonia.WaveDrom
+	url = https://github.com/ajkfds/LiveMarkdown.Avalonia.WaveDrom.git
