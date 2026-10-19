@@ -30,6 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LiveMarkdown.Avalonia.WaveDrom\LiveMarkdown.Avalonia.WaveDrom.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Controls\ListViewControl.axaml.cs">
       <DependentUpon>ListViewControl.axaml</DependentUpon>
     </Compile>
