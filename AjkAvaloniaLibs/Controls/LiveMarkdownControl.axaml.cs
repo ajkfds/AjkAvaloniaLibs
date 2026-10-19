@@ -23,11 +23,10 @@ public partial class LiveMarkdownControl : UserControl
         //    ];
 
         // add markdown renderer (need .net 10)
-        LiveMarkdown.Avalonia.MarkdownRenderer.ConfigurePipeline += x => x.UseMermaid().UseWaveDrom();
+        LiveMarkdown.Avalonia.MarkdownRenderer.ConfigurePipeline += x => x.UseMermaid().UseWaveDrom().UseDrawIo();
         LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.MermaidBlockNode>();
         LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.WaveDromBlockNode>();
-
-//        LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.DrawIoBlockNode>();
+        LiveMarkdown.Avalonia.MarkdownNode.Register<LiveMarkdown.Avalonia.DrawIoBlockNode>();
 
         Content = border;
         border.CornerRadius= new CornerRadius(5);
@@ -43,10 +42,13 @@ public partial class LiveMarkdownControl : UserControl
 
         
     }
+
     /* add styles to App.xaml like this:
     <Application.Styles>
     <!-- Your other styles here -->
-    <StyleInclude Source="avares://LiveMarkdown.Avalonia/Styles.axaml"/>
+        <StyleInclude Source="avares://LiveMarkdown.Avalonia/Styles.axaml"/>
+        <StyleInclude Source="avares://LiveMarkdown.Avalonia.Mermaid/Styles.axaml"/>
+		<StyleInclude Source="avares://LiveMarkdown.Avalonia.DrawIo/Styles.axaml"/>
     </Application.Styles>
 
     <Application.Resources>
